@@ -6,20 +6,20 @@ using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace Kralizek.Extensions.Configuration.Objects.Internal
+namespace Kralizek.Extensions.Configuration.Internal
 {
-    public interface IConfigurationExtractor
+    public interface IConfigurationSerializer
     {
-        IDictionary<string, string> ExtractConfiguration(object source, string rootSectionName);
+        IDictionary<string, string> Serialize(object source, string rootSectionName);
     }
 
-    public class JsonConfigurationExtractor : IConfigurationExtractor
+    public class JsonConfigurationSerializer : IConfigurationSerializer
     {
         private readonly IDictionary<string, string> _data = new SortedDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         private readonly Stack<string> _context = new Stack<string>();
         private string _currentPath;
 
-        public IDictionary<string, string> ExtractConfiguration(object source, string rootSectionName)
+        public IDictionary<string, string> Serialize(object source, string rootSectionName)
         {
             var json = JsonConvert.SerializeObject(source);
             var jsonConfig = JObject.Parse(json);
@@ -83,7 +83,7 @@ namespace Kralizek.Extensions.Configuration.Objects.Internal
 
         private void VisitArray(JArray array)
         {
-            for (int index = 0; index < array.Count; index++)
+            for (var index = 0; index < array.Count; index++)
             {
                 EnterContext(index.ToString());
                 VisitToken(array[index]);
@@ -97,7 +97,7 @@ namespace Kralizek.Extensions.Configuration.Objects.Internal
 
             if (_data.ContainsKey(key))
             {
-                throw new FormatException(string.Format("A duplicate key '{0}' was found.", key));
+                throw new FormatException($"A duplicate key '{key}' was found.");
             }
             _data[key] = data.ToString(CultureInfo.InvariantCulture);
         }

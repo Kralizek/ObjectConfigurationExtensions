@@ -1,12 +1,13 @@
 ﻿using System;
-using Kralizek.Extensions.Configuration.Objects.Internal;
+using Kralizek.Extensions.Configuration.Internal;
+
 // ReSharper disable CheckNamespace
 
 namespace Microsoft.Extensions.Configuration
 {
     public static class ObjectConfigurationExtensions
     {
-        public static IConfigurationBuilder AddObject<T>(this IConfigurationBuilder configurationBuilder, T objectToAdd, string rootSectionName = "")
+        public static IConfigurationBuilder AddObject(this IConfigurationBuilder configurationBuilder, object objectToAdd, string rootSectionName = "")
         {
             if (objectToAdd == null)
             {
@@ -18,9 +19,9 @@ namespace Microsoft.Extensions.Configuration
                 throw new ArgumentNullException(nameof(rootSectionName));
             }
 
-            var extractor = new JsonConfigurationExtractor();
+            var serializer = new JsonConfigurationSerializer();
 
-            configurationBuilder.Add(new ObjectConfigurationSource(extractor, objectToAdd, rootSectionName));
+            configurationBuilder.Add(new ObjectConfigurationSource(serializer, objectToAdd, rootSectionName));
 
             return configurationBuilder;
         }

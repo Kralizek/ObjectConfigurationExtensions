@@ -1,24 +1,24 @@
 using System;
 using Microsoft.Extensions.Configuration;
 
-namespace Kralizek.Extensions.Configuration.Objects.Internal
+namespace Kralizek.Extensions.Configuration.Internal
 {
     public class ObjectConfigurationProvider : ConfigurationProvider
     {
         private readonly string _rootSectionName;
         private readonly object _source;
-        private readonly IConfigurationExtractor _extractor;
+        private readonly IConfigurationSerializer _serializer;
 
-        public ObjectConfigurationProvider(IConfigurationExtractor extractor, object source, string rootSectionName)
+        public ObjectConfigurationProvider(IConfigurationSerializer serializer, object source, string rootSectionName)
         {
             _rootSectionName = rootSectionName ?? throw new ArgumentNullException(nameof(rootSectionName));
             _source = source ?? throw new ArgumentNullException(nameof(source));
-            _extractor = extractor ?? throw new ArgumentNullException(nameof(extractor));
+            _serializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
         }
 
         public override void Load()
         {
-            Data = _extractor.ExtractConfiguration(_source, _rootSectionName);
+            Data = _serializer.Serialize(_source, _rootSectionName);
 
             base.Load();
         }
