@@ -20,17 +20,15 @@ Task("Version")
 {
     var version = GitVersion();
 
-    var packageVersion = version.SemVer;
-    var buildVersion = $"{version.FullSemVer}+{DateTimeOffset.UtcNow:yyyyMMddHHmmss}";
-
     state.Version = new VersionInfo
     {
-        PackageVersion = packageVersion,
-        BuildVersion = buildVersion
+        PackageVersion = version.SemVer,
+        AssemblyVersion = $"{version.SemVer}+{version.Sha.Substring(0, 8)}",
+        BuildVersion = $"{version.FullSemVer}+{version.Sha.Substring(0, 8)}-{DateTimeOffset.UtcNow:yyyyMMddHHmmss}"
     };
 
-
     Information($"Package version: {state.Version.PackageVersion}");
+    Information($"Assembly version: {state.Version.AssemblyVersion}");
     Information($"Build version: {state.Version.BuildVersion}");
 
     if (BuildSystem.IsRunningOnAppVeyor)
@@ -196,7 +194,10 @@ Task("PackLibraries")
         NoRestore = true,
         OutputDirectory = state.Paths.OutputFolder,
         IncludeSymbols = true,
-        ArgumentCustomization = args => args.Append($"-p:SymbolPackageFormat=snupkg -p:Version={state.Version.PackageVersion}")
+        MSBuildSettings = new DotNetCoreMSBuildSettings()
+                            .SetInformationalVersion(state.Version.AssemblyVersion)
+                            .SetVersion(state.Version.PackageVersion)
+                            .WithProperty("ContinuousIntegrationBuild", "true")
     };
 
     DotNetCorePack(state.Paths.SolutionFile.ToString(), settings);
@@ -284,5 +285,7 @@ public class VersionInfo
 {
     public string PackageVersion { get; set; }
 
-    public string BuildVersion {get; set; }
+    public string AssemblyVersion { get; set; }
+
+    public string BuildVersion { get; set; }
 }
