@@ -1,17 +1,13 @@
 #tool "nuget:?package=ReportGenerator&version=4.0.5"
 #tool "nuget:?package=JetBrains.dotCover.CommandLineTools&version=2019.2.2"
 #tool "nuget:?package=GitVersion.CommandLine&version=4.0.0"
-
 var target = Argument("Target", "Full");
 
 Setup<BuildState>(_ => 
 {
     var state = new BuildState
     {
-        Paths = new BuildPaths
-        {
-            SolutionFile = MakeAbsolute(File("./ObjectConfigurationExtensions.sln"))
-        }
+        Paths = new BuildPaths(solutionFile: GetSolutionFile())
     };
 
     CleanDirectory(state.Paths.OutputFolder);
@@ -72,6 +68,8 @@ Task("RunTests")
     .Does<BuildState>(state => 
 {
     var projectFiles = GetFiles($"{state.Paths.TestFolder}/**/Tests.*.csproj");
+
+    var frameworks = new[]{"netcoreapp2.2", "net472"};
 
     bool success = true;
 
@@ -238,6 +236,17 @@ Task("Full")
 
 RunTarget(target);
 
+private FilePath GetSolutionFile()
+{
+    var solutionFilesInRoot = GetFiles("./*.sln");
+
+    var solutionFile = solutionFilesInRoot.FirstOrDefault();
+
+    if (solutionFile == null) throw new ArgumentNullException("No solution file found");
+
+    return solutionFile;
+}
+
 public class BuildState
 {
     public VersionInfo Version { get; set; }
@@ -247,7 +256,12 @@ public class BuildState
 
 public class BuildPaths
 {
-    public FilePath SolutionFile { get; set; }
+    public BuildPaths(FilePath solutionFile)
+    {
+        SolutionFile = solutionFile ?? throw new ArgumentNullException(nameof(solutionFile));
+    }
+
+    public FilePath SolutionFile { get; }
 
     public DirectoryPath SolutionFolder => SolutionFile.GetDirectory();
 
