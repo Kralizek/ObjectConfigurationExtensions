@@ -15,103 +15,113 @@ namespace Kralizek.Extensions.Configuration.Internal
 
     public class JsonConfigurationSerializer : IConfigurationSerializer
     {
-        private readonly IDictionary<string, string> _data = new SortedDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        private readonly Stack<string> _context = new Stack<string>();
-        private string _currentPath;
-
         public IDictionary<string, string> Serialize(object source, string rootSectionName)
         {
             var json = JsonConvert.SerializeObject(source);
             var jsonConfig = JObject.Parse(json);
 
-            if (rootSectionName != "")
+            var visitor = new JsonVisitor();
+
+            return visitor.ParseObject(jsonConfig, rootSectionName);
+        }
+
+        private class JsonVisitor
+        {
+            private readonly IDictionary<string, string> _data = new SortedDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            private readonly Stack<string> _context = new ();
+            private string _currentPath;
+
+            public IDictionary<string, string> ParseObject(JObject jsonObject, string rootSectionName)
             {
-                EnterContext(rootSectionName);
+                if (rootSectionName != "")
+                {
+                    EnterContext(rootSectionName);
+                }
+
+                VisitJObject(jsonObject);
+
+                if (rootSectionName != "")
+                {
+                    ExitContext();
+                }
+
+                return _data;
             }
 
-            VisitJObject(jsonConfig);
-
-            if (rootSectionName != "")
+            private void VisitJObject(JObject jObject)
             {
-                ExitContext();
+                foreach (var property in jObject.Properties())
+                {
+                    EnterContext(property.Name);
+                    VisitProperty(property);
+                    ExitContext();
+                }
             }
 
-            return _data;
-        }
-
-        private void VisitJObject(JObject jObject)
-        {
-            foreach (var property in jObject.Properties())
+            private void VisitProperty(JProperty property)
             {
-                EnterContext(property.Name);
-                VisitProperty(property);
-                ExitContext();
+                VisitToken(property.Value);
             }
-        }
 
-        private void VisitProperty(JProperty property)
-        {
-            VisitToken(property.Value);
-        }
-
-        private void VisitToken(JToken token)
-        {
-            switch (token.Type)
+            private void VisitToken(JToken token)
             {
-                case JTokenType.Object:
-                    VisitJObject(token.Value<JObject>());
-                    break;
+                switch (token.Type)
+                {
+                    case JTokenType.Object:
+                        VisitJObject(token.Value<JObject>());
+                        break;
 
-                case JTokenType.Array:
-                    VisitArray(token.Value<JArray>());
-                    break;
+                    case JTokenType.Array:
+                        VisitArray(token.Value<JArray>());
+                        break;
 
-                case JTokenType.Integer:
-                case JTokenType.Float:
-                case JTokenType.String:
-                case JTokenType.Boolean:
-                case JTokenType.Bytes:
-                case JTokenType.Raw:
-                case JTokenType.Null:
-                    VisitPrimitive(token.Value<JValue>());
-                    break;
+                    case JTokenType.Integer:
+                    case JTokenType.Float:
+                    case JTokenType.String:
+                    case JTokenType.Boolean:
+                    case JTokenType.Bytes:
+                    case JTokenType.Raw:
+                    case JTokenType.Null:
+                        VisitPrimitive(token.Value<JValue>());
+                        break;
 
-                default:
-                    throw new NotSupportedException($"Unsupported JSON token '{token.Type}' was found");
+                    default:
+                        throw new NotSupportedException($"Unsupported JSON token '{token.Type}' was found");
+                }
             }
-        }
 
-        private void VisitArray(JArray array)
-        {
-            for (var index = 0; index < array.Count; index++)
+            private void VisitArray(JArray array)
             {
-                EnterContext(index.ToString());
-                VisitToken(array[index]);
-                ExitContext();
+                for (var index = 0; index < array.Count; index++)
+                {
+                    EnterContext(index.ToString());
+                    VisitToken(array[index]);
+                    ExitContext();
+                }
             }
-        }
 
-        private void VisitPrimitive(JValue data)
-        {
-            var key = _currentPath;
-
-            if (_data.ContainsKey(key))
+            private void VisitPrimitive(JValue data)
             {
-                throw new FormatException($"A duplicate key '{key}' was found.");
+                var key = _currentPath;
+
+                if (_data.ContainsKey(key))
+                {
+                    throw new FormatException($"A duplicate key '{key}' was found.");
+                }
+                _data[key] = data.ToString(CultureInfo.InvariantCulture);
             }
-            _data[key] = data.ToString(CultureInfo.InvariantCulture);
-        }
 
-        private void EnterContext(string context)
-        {
-            _context.Push(context);
-            _currentPath = ConfigurationPath.Combine(_context.Reverse());
-        }
+            private void EnterContext(string context)
+            {
+                _context.Push(context);
+                _currentPath = ConfigurationPath.Combine(_context.Reverse());
+            }
 
-        private void ExitContext()
-        {
-            _context.Pop();
-            _currentPath = ConfigurationPath.Combine(_context.Reverse());
+            private void ExitContext()
+            {
+                _context.Pop();
+                _currentPath = ConfigurationPath.Combine(_context.Reverse());
+            }
         }
     }
 }
