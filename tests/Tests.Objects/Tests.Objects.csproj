@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Kralizek.Extensions.Configuration.Objects\Kralizek.Extensions.Configuration.Objects.csproj" />
+    <ProjectReference Include="..\..\src\Objects\Objects.csproj" />
   </ItemGroup>
 
 </Project>
