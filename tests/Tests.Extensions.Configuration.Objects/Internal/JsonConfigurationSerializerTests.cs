@@ -68,5 +68,20 @@ namespace Tests.Internal
             Assert.That(result[$"{rootSectionName}:{nameof(testSource.Items)}:0:{nameof(ObjectWithSimpleProperties.Text)}"], Is.EqualTo($"{testSource.Items[0].Text}"));
             Assert.That(result[$"{rootSectionName}:{nameof(testSource.Items)}:0:{nameof(ObjectWithSimpleProperties.Value)}"], Is.EqualTo($"{testSource.Items[0].Value}"));
         }
+
+        [Test, CustomAutoData]
+        [Property("Issue", "2")]
+        public void Importing_same_object_twice_should_not_throw(JsonConfigurationSerializer sut, ObjectWithComplexArray testSource, string rootSectionName)
+        {
+            _ = sut.Serialize(testSource, rootSectionName);
+
+            var result = sut.Serialize(testSource, rootSectionName);
+
+            Assert.That(result, Contains.Key($"{rootSectionName}:{nameof(testSource.Items)}:0:{nameof(ObjectWithSimpleProperties.Text)}"));
+            Assert.That(result, Contains.Key($"{rootSectionName}:{nameof(testSource.Items)}:0:{nameof(ObjectWithSimpleProperties.Value)}"));
+
+            Assert.That(result[$"{rootSectionName}:{nameof(testSource.Items)}:0:{nameof(ObjectWithSimpleProperties.Text)}"], Is.EqualTo($"{testSource.Items[0].Text}"));
+            Assert.That(result[$"{rootSectionName}:{nameof(testSource.Items)}:0:{nameof(ObjectWithSimpleProperties.Value)}"], Is.EqualTo($"{testSource.Items[0].Value}"));
+        }
     }
 }
