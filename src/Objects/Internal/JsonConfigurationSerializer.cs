@@ -108,7 +108,13 @@ namespace Kralizek.Extensions.Configuration.Internal
                 {
                     throw new FormatException($"A duplicate key '{key}' was found.");
                 }
-                _data[key] = data.ToString(CultureInfo.InvariantCulture);
+
+                var stringValue = data.ToString(CultureInfo.InvariantCulture);
+
+                if (!string.IsNullOrEmpty(stringValue))
+                {
+                    _data[key] = stringValue;
+                }
             }
 
             private void EnterContext(string context)
