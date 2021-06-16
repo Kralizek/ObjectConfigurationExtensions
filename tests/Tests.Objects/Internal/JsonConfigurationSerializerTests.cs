@@ -83,5 +83,19 @@ namespace Tests.Internal
             Assert.That(result[$"{rootSectionName}:{nameof(testSource.Items)}:0:{nameof(ObjectWithSimpleProperties.Text)}"], Is.EqualTo($"{testSource.Items[0].Text}"));
             Assert.That(result[$"{rootSectionName}:{nameof(testSource.Items)}:0:{nameof(ObjectWithSimpleProperties.Value)}"], Is.EqualTo($"{testSource.Items[0].Value}"));
         }
+
+        [Test, CustomAutoData]
+        [Property("Issue", "2")]
+        public void Null_values_should_not_be_added(JsonConfigurationSerializer sut, ObjectWithSimpleProperties testSource, string rootSectionName)
+        {
+            testSource.Text = null;
+
+            var result = sut.Serialize(testSource, rootSectionName);
+
+            Assert.That(result, Does.Not.ContainKey($"{rootSectionName}:{nameof(testSource.Text)}"));
+            Assert.That(result, Contains.Key($"{rootSectionName}:{nameof(testSource.Value)}"));
+
+            Assert.That(result[$"{rootSectionName}:{nameof(testSource.Value)}"], Is.EqualTo($"{testSource.Value}"));
+        }
     }
 }

@@ -123,5 +123,37 @@ namespace Tests
         }
 
         bool Comparison(ObjectWithSimpleProperties first, ObjectWithSimpleProperties second) => first.Text == second.Text && first.Value == second.Value;
+
+        
+        [Test, CustomAutoData]
+        [Property("Issue", "3")]
+        public void Null_values_should_not_override_existing_values(ConfigurationBuilder configurationBuilder, ObjectWithSimpleProperties testSource)
+        {
+            configurationBuilder.AddObject(testSource);
+
+            configurationBuilder.AddObject(new ObjectWithSimpleProperties{ Text = null, Value = testSource.Value });
+
+            var configuration = configurationBuilder.Build();
+
+            var result = configuration.Get<ObjectWithSimpleProperties>();
+
+            Assert.That(result.Text, Is.EqualTo(testSource.Text));
+            Assert.That(result.Value, Is.EqualTo(testSource.Value));
+        }
+
+        [Test, CustomAutoData]
+        [Property("Issue", "3")]
+        public void Null_values_should_not_override_existing_values(ConfigurationBuilder configurationBuilder, ObjectWithSimpleIntArray testSource)
+        {
+            configurationBuilder.AddObject(testSource);
+
+            configurationBuilder.AddObject(new ObjectWithSimpleIntArray { Values = new int[0] });
+
+            var configuration = configurationBuilder.Build();
+
+            var result = configuration.Get<ObjectWithSimpleIntArray>();
+
+            Assert.That(result.Values, Is.EquivalentTo(testSource.Values));
+        }
     }
 }
