@@ -23,7 +23,7 @@ install:
 build_script:
   - cmd: dotnet cake --target=Full
 
-test: off
+test: false
 
 artifacts:
   - path: outputs\*.nupkg
