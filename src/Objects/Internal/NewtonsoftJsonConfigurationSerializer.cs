@@ -10,12 +10,12 @@ namespace Kralizek.Extensions.Configuration.Internal
 {
     public interface IConfigurationSerializer
     {
-        IDictionary<string, string> Serialize(object source, string rootSectionName);
+        IDictionary<string, string?> Serialize(object source, string rootSectionName);
     }
 
     public class NewtonsoftJsonConfigurationSerializer : IConfigurationSerializer
     {
-        public IDictionary<string, string> Serialize(object source, string rootSectionName)
+        public IDictionary<string, string?> Serialize(object source, string rootSectionName)
         {
             var json = JsonConvert.SerializeObject(source);
             var jsonConfig = JObject.Parse(json);
@@ -27,11 +27,11 @@ namespace Kralizek.Extensions.Configuration.Internal
 
         private class JsonVisitor
         {
-            private readonly IDictionary<string, string> _data = new SortedDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            private readonly IDictionary<string, string?> _data = new SortedDictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
             private readonly Stack<string> _context = new ();
             private string _currentPath = null!;
 
-            public IDictionary<string, string> ParseObject(JObject jsonObject, string rootSectionName)
+            public IDictionary<string, string?> ParseObject(JObject jsonObject, string rootSectionName)
             {
                 if (rootSectionName != "")
                 {
@@ -48,9 +48,9 @@ namespace Kralizek.Extensions.Configuration.Internal
                 return _data;
             }
 
-            private void VisitJObject(JObject jObject)
+            private void VisitJObject(JObject? jObject)
             {
-                foreach (var property in jObject.Properties())
+                foreach (var property in jObject?.Properties() ?? [])
                 {
                     EnterContext(property.Name);
                     VisitProperty(property);
@@ -85,13 +85,24 @@ namespace Kralizek.Extensions.Configuration.Internal
                         VisitPrimitive(token.Value<JValue>());
                         break;
 
+                    case JTokenType.None:
+                    case JTokenType.Constructor:
+                    case JTokenType.Property:
+                    case JTokenType.Comment:
+                    case JTokenType.Undefined:
+                    case JTokenType.Date:
+                    case JTokenType.Guid:
+                    case JTokenType.Uri:
+                    case JTokenType.TimeSpan:
                     default:
                         throw new NotSupportedException($"Unsupported JSON token '{token.Type}' was found");
                 }
             }
 
-            private void VisitArray(JArray array)
+            private void VisitArray(JArray? array)
             {
+                if (array is null) return;
+                
                 for (var index = 0; index < array.Count; index++)
                 {
                     EnterContext(index.ToString());
@@ -100,8 +111,10 @@ namespace Kralizek.Extensions.Configuration.Internal
                 }
             }
 
-            private void VisitPrimitive(JValue data)
+            private void VisitPrimitive(JValue? data)
             {
+                if (data is null) return;
+                
                 var key = _currentPath;
 
                 if (_data.ContainsKey(key))

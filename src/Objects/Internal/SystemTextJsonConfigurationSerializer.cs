@@ -14,7 +14,7 @@ namespace Kralizek.Extensions.Configuration.Internal
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
         };
         
-        public IDictionary<string, string> Serialize(object source, string rootSectionName)
+        public IDictionary<string, string?> Serialize(object source, string rootSectionName)
         {
             var json = JsonSerializer.Serialize(source, JsonOptions);
             var jsonConfig = JsonDocument.Parse(json).RootElement;
@@ -26,11 +26,11 @@ namespace Kralizek.Extensions.Configuration.Internal
 
         private class JsonVisitor
         {
-            private readonly IDictionary<string, string> _data = new SortedDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            private readonly IDictionary<string, string?> _data = new SortedDictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
             private readonly Stack<string> _context = new();
             private string _currentPath = null!;
 
-            public IDictionary<string, string> ParseObject(JsonElement jsonObject, string rootSectionName)
+            public IDictionary<string, string?> ParseObject(JsonElement jsonObject, string rootSectionName)
             {
                 if (!string.IsNullOrEmpty(rootSectionName))
                 {
@@ -79,6 +79,7 @@ namespace Kralizek.Extensions.Configuration.Internal
                         VisitPrimitive(element);
                         break;
 
+                    case JsonValueKind.Undefined:
                     default:
                         throw new NotSupportedException($"Unsupported JSON token '{element.ValueKind}' was found");
                 }

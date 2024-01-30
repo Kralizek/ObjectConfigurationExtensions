@@ -7,7 +7,7 @@ namespace Microsoft.Extensions.Configuration
 {
     public static class ObjectConfigurationExtensions
     {
-        public static IConfigurationBuilder AddObject(this IConfigurationBuilder configurationBuilder, object? objectToAdd, string? rootSectionName = "")
+        public static IConfigurationBuilder AddObject(this IConfigurationBuilder configurationBuilder, IConfigurationSerializer serializer, object? objectToAdd, string? rootSectionName = "")
         {
             if (objectToAdd is null)
             {
@@ -18,31 +18,24 @@ namespace Microsoft.Extensions.Configuration
             {
                 throw new ArgumentNullException(nameof(rootSectionName));
             }
-
-            var serializer = new SystemTextJsonConfigurationSerializer();
 
             configurationBuilder.Add(new ObjectConfigurationSource(serializer, objectToAdd, rootSectionName));
 
             return configurationBuilder;
         }
+        
+        public static IConfigurationBuilder AddObject(this IConfigurationBuilder configurationBuilder, object? objectToAdd, string? rootSectionName = "")
+        {
+            var serializer = new SystemTextJsonConfigurationSerializer();
+
+            return AddObject(configurationBuilder, serializer, objectToAdd, rootSectionName);
+        }
 
         public static IConfigurationBuilder AddObjectWithNewtonsoftJson(this IConfigurationBuilder configurationBuilder, object? objectToAdd, string? rootSectionName = "")
         {
-            if (objectToAdd is null)
-            {
-                return configurationBuilder;
-            }
-            
-            if (rootSectionName == null)
-            {
-                throw new ArgumentNullException(nameof(rootSectionName));
-            }
-
             var serializer = new NewtonsoftJsonConfigurationSerializer();
 
-            configurationBuilder.Add(new ObjectConfigurationSource(serializer, objectToAdd, rootSectionName));
-
-            return configurationBuilder;
+            return AddObject(configurationBuilder, serializer, objectToAdd, rootSectionName);
         }
     }
 }
