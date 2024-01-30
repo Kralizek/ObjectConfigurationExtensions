@@ -3,6 +3,7 @@ using Kralizek.Extensions.Configuration.Internal;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using NUnit.Framework;
+// ReSharper disable InvokeAsExtensionMethod
 
 namespace Tests;
 
@@ -33,11 +34,5 @@ public class NewtonsoftJsonObjectConfigurationExtensionsTests
         NewtonsoftJsonObjectConfigurationExtensions.AddObjectWithNewtonsoftJson(configurationBuilder, null!, rootSectionName);
 
         Mock.Get(configurationBuilder).Verify(p => p.Add(It.IsAny<IConfigurationSource>()), Times.Never);
-    }
-
-    [Test, CustomAutoData]
-    public void AddObject_throws_if_rootSectionName_is_null(IConfigurationBuilder configurationBuilder, object testSource)
-    {
-        Assert.Throws<ArgumentNullException>(() => NewtonsoftJsonObjectConfigurationExtensions.AddObjectWithNewtonsoftJson(configurationBuilder, testSource, null));
     }
 }

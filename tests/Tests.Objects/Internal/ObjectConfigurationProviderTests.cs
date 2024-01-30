@@ -1,5 +1,6 @@
 ﻿using AutoFixture.Idioms;
 using AutoFixture.NUnit3;
+using Kralizek.Extensions.Configuration;
 using Kralizek.Extensions.Configuration.Internal;
 using Moq;
 using NUnit.Framework;

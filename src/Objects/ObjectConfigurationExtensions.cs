@@ -1,4 +1,5 @@
 ﻿using System;
+using Kralizek.Extensions.Configuration;
 using Kralizek.Extensions.Configuration.Internal;
 
 // ReSharper disable CheckNamespace
@@ -13,13 +14,8 @@ public static class ObjectConfigurationExtensions
         {
             return configurationBuilder;
         }
-            
-        if (rootSectionName == null)
-        {
-            throw new ArgumentNullException(nameof(rootSectionName));
-        }
 
-        configurationBuilder.Add(new ObjectConfigurationSource(serializer, objectToAdd, rootSectionName));
+        configurationBuilder.Add(new ObjectConfigurationSource(serializer, objectToAdd, rootSectionName ?? string.Empty));
 
         return configurationBuilder;
     }

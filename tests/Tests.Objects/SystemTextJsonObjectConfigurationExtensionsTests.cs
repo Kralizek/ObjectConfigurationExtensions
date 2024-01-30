@@ -35,10 +35,4 @@ public class SystemTextJsonObjectConfigurationExtensionsTests
 
         Mock.Get(configurationBuilder).Verify(p => p.Add(It.IsAny<IConfigurationSource>()), Times.Never);
     }
-
-    [Test, CustomAutoData]
-    public void AddObject_throws_if_rootSectionName_is_null(IConfigurationBuilder configurationBuilder, object testSource)
-    {
-        Assert.Throws<ArgumentNullException>(() => ObjectConfigurationExtensions.AddObject(configurationBuilder, testSource, null));
-    }
 }

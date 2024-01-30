@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Kralizek.Extensions.Configuration.Internal;
+namespace Kralizek.Extensions.Configuration;
 
 public interface IConfigurationSerializer
 {
