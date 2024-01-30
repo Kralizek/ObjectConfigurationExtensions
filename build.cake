@@ -67,7 +67,7 @@ Task("RunTests")
 {
     var projectFiles = GetFiles($"{state.Paths.TestFolder}/**/Tests.*.csproj");
 
-    var frameworks = new[]{"netcoreapp2.2", "net472"};
+    // var frameworks = new[]{"netcoreapp2.2", "net472"};
 
     bool success = true;
 
