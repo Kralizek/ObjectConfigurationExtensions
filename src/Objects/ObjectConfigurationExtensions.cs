@@ -3,39 +3,31 @@ using Kralizek.Extensions.Configuration.Internal;
 
 // ReSharper disable CheckNamespace
 
-namespace Microsoft.Extensions.Configuration
+namespace Microsoft.Extensions.Configuration;
+
+public static class ObjectConfigurationExtensions
 {
-    public static class ObjectConfigurationExtensions
+    public static IConfigurationBuilder AddObject(this IConfigurationBuilder configurationBuilder, IConfigurationSerializer serializer, object? objectToAdd, string? rootSectionName = "")
     {
-        public static IConfigurationBuilder AddObject(this IConfigurationBuilder configurationBuilder, IConfigurationSerializer serializer, object? objectToAdd, string? rootSectionName = "")
+        if (objectToAdd is null)
         {
-            if (objectToAdd is null)
-            {
-                return configurationBuilder;
-            }
-            
-            if (rootSectionName == null)
-            {
-                throw new ArgumentNullException(nameof(rootSectionName));
-            }
-
-            configurationBuilder.Add(new ObjectConfigurationSource(serializer, objectToAdd, rootSectionName));
-
             return configurationBuilder;
         }
+            
+        if (rootSectionName == null)
+        {
+            throw new ArgumentNullException(nameof(rootSectionName));
+        }
+
+        configurationBuilder.Add(new ObjectConfigurationSource(serializer, objectToAdd, rootSectionName));
+
+        return configurationBuilder;
+    }
         
-        public static IConfigurationBuilder AddObject(this IConfigurationBuilder configurationBuilder, object? objectToAdd, string? rootSectionName = "")
-        {
-            var serializer = new SystemTextJsonConfigurationSerializer();
+    public static IConfigurationBuilder AddObject(this IConfigurationBuilder configurationBuilder, object? objectToAdd, string? rootSectionName = "")
+    {
+        var serializer = new SystemTextJsonConfigurationSerializer();
 
-            return AddObject(configurationBuilder, serializer, objectToAdd, rootSectionName);
-        }
-
-        public static IConfigurationBuilder AddObjectWithNewtonsoftJson(this IConfigurationBuilder configurationBuilder, object? objectToAdd, string? rootSectionName = "")
-        {
-            var serializer = new NewtonsoftJsonConfigurationSerializer();
-
-            return AddObject(configurationBuilder, serializer, objectToAdd, rootSectionName);
-        }
+        return AddObject(configurationBuilder, serializer, objectToAdd, rootSectionName);
     }
 }
