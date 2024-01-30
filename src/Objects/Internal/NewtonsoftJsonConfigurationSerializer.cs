@@ -13,7 +13,7 @@ namespace Kralizek.Extensions.Configuration.Internal
         IDictionary<string, string> Serialize(object source, string rootSectionName);
     }
 
-    public class JsonConfigurationSerializer : IConfigurationSerializer
+    public class NewtonsoftJsonConfigurationSerializer : IConfigurationSerializer
     {
         public IDictionary<string, string> Serialize(object source, string rootSectionName)
         {
@@ -29,7 +29,7 @@ namespace Kralizek.Extensions.Configuration.Internal
         {
             private readonly IDictionary<string, string> _data = new SortedDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             private readonly Stack<string> _context = new ();
-            private string _currentPath;
+            private string _currentPath = null!;
 
             public IDictionary<string, string> ParseObject(JObject jsonObject, string rootSectionName)
             {

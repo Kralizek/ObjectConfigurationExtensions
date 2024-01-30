@@ -5,16 +5,16 @@ using NUnit.Framework;
 namespace Tests.Internal
 {
     [TestFixture]
-    public class JsonConfigurationSerializerTests
+    public class NewtonsoftJsonConfigurationSerializerTests
     {
         [Test, CustomAutoData]
         public void Constructor_is_guarded(GuardClauseAssertion assertion)
         {
-            assertion.Verify(typeof(JsonConfigurationSerializer).GetConstructors());
+            assertion.Verify(typeof(NewtonsoftJsonConfigurationSerializer).GetConstructors());
         }
 
         [Test, CustomAutoData] 
-        public void Object_is_correctly_serialized(JsonConfigurationSerializer sut, ObjectWithSimpleProperties testSource, string rootSectionName)
+        public void Object_is_correctly_serialized(NewtonsoftJsonConfigurationSerializer sut, ObjectWithSimpleProperties testSource, string rootSectionName)
         {
             var result = sut.Serialize(testSource, rootSectionName);
 
@@ -26,7 +26,7 @@ namespace Tests.Internal
         }
 
         [Test, CustomAutoData]
-        public void Object_is_correctly_serialized(JsonConfigurationSerializer sut, ObjectWithInnerObject testSource, string rootSectionName)
+        public void Object_is_correctly_serialized(NewtonsoftJsonConfigurationSerializer sut, ObjectWithInnerObject testSource, string rootSectionName)
         {
             var result = sut.Serialize(testSource, rootSectionName);
 
@@ -38,7 +38,7 @@ namespace Tests.Internal
         }
 
         [Test, CustomAutoData]
-        public void Object_with_array_is_correctly_serialized(JsonConfigurationSerializer sut, ObjectWithSimpleStringArray testSource, string rootSectionName)
+        public void Object_with_array_is_correctly_serialized(NewtonsoftJsonConfigurationSerializer sut, ObjectWithSimpleStringArray testSource, string rootSectionName)
         {
             var result = sut.Serialize(testSource, rootSectionName);
 
@@ -48,7 +48,7 @@ namespace Tests.Internal
         }
 
         [Test, CustomAutoData]
-        public void Object_with_array_is_correctly_serialized(JsonConfigurationSerializer sut, ObjectWithSimpleIntArray testSource, string rootSectionName)
+        public void Object_with_array_is_correctly_serialized(NewtonsoftJsonConfigurationSerializer sut, ObjectWithSimpleIntArray testSource, string rootSectionName)
         {
             var result = sut.Serialize(testSource, rootSectionName);
 
@@ -58,7 +58,7 @@ namespace Tests.Internal
         }
 
         [Test, CustomAutoData]
-        public void Object_with_array_is_correctly_serialized(JsonConfigurationSerializer sut, ObjectWithComplexArray testSource, string rootSectionName)
+        public void Object_with_array_is_correctly_serialized(NewtonsoftJsonConfigurationSerializer sut, ObjectWithComplexArray testSource, string rootSectionName)
         {
             var result = sut.Serialize(testSource, rootSectionName);
 
@@ -71,7 +71,7 @@ namespace Tests.Internal
 
         [Test, CustomAutoData]
         [Property("Issue", "2")]
-        public void Importing_same_object_twice_should_not_throw(JsonConfigurationSerializer sut, ObjectWithComplexArray testSource, string rootSectionName)
+        public void Importing_same_object_twice_should_not_throw(NewtonsoftJsonConfigurationSerializer sut, ObjectWithComplexArray testSource, string rootSectionName)
         {
             _ = sut.Serialize(testSource, rootSectionName);
 
@@ -86,7 +86,7 @@ namespace Tests.Internal
 
         [Test, CustomAutoData]
         [Property("Issue", "2")]
-        public void Null_values_should_not_be_added(JsonConfigurationSerializer sut, ObjectWithSimpleProperties testSource, string rootSectionName)
+        public void Null_values_should_not_be_added(NewtonsoftJsonConfigurationSerializer sut, ObjectWithSimpleProperties testSource, string rootSectionName)
         {
             testSource.Text = null;
 
