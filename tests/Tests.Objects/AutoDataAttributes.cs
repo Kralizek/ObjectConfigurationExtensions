@@ -3,39 +3,38 @@ using AutoFixture;
 using AutoFixture.AutoMoq;
 using AutoFixture.NUnit3;
 
-namespace Tests
+namespace Tests;
+
+[AttributeUsage(AttributeTargets.Method)]
+public class CustomAutoDataAttribute : AutoDataAttribute
 {
-    [AttributeUsage(AttributeTargets.Method)]
-    public class CustomAutoDataAttribute : AutoDataAttribute
+    public CustomAutoDataAttribute() : base(FixtureHelper.CreateFixture)
     {
-        public CustomAutoDataAttribute() : base(FixtureHelper.CreateFixture)
-        {
             
-        }
     }
+}
 
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-    public class CustomInlineAutoDataAttribute : InlineAutoDataAttribute
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+public class CustomInlineAutoDataAttribute : InlineAutoDataAttribute
+{
+    public CustomInlineAutoDataAttribute(params object[] arguments) : base(FixtureHelper.CreateFixture, arguments)
     {
-        public CustomInlineAutoDataAttribute(params object[] arguments) : base(FixtureHelper.CreateFixture, arguments)
-        {
             
-        }
     }
+}
 
-    public static class FixtureHelper
+public static class FixtureHelper
+{
+    public static IFixture CreateFixture()
     {
-        public static IFixture CreateFixture()
+        var fixture = new Fixture();
+
+        fixture.Customize(new AutoMoqCustomization
         {
-            var fixture = new Fixture();
+            ConfigureMembers = true,
+            GenerateDelegates = true
+        });
 
-            fixture.Customize(new AutoMoqCustomization
-            {
-                ConfigureMembers = true,
-                GenerateDelegates = true
-            });
-
-            return fixture;
-        }
+        return fixture;
     }
 }
