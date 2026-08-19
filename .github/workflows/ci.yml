@@ -38,11 +38,6 @@ jobs:
             **/*.props
             **/*.targets
 
-      - name: Setup .NET 6 runtime
-        uses: actions/setup-dotnet@v5
-        with:
-          dotnet-version: '6.0.x'
-
       - name: Restore
         run: dotnet restore
 
