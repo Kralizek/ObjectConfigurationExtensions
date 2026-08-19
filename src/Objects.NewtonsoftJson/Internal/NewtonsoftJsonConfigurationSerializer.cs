@@ -23,7 +23,7 @@ public class NewtonsoftJsonConfigurationSerializer : IConfigurationSerializer
     private class JsonVisitor
     {
         private readonly IDictionary<string, string?> _data = new SortedDictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
-        private readonly Stack<string> _context = new ();
+        private readonly Stack<string> _context = new();
         private string _currentPath = null!;
 
         public IDictionary<string, string?> ParseObject(JObject jsonObject, string rootSectionName)
@@ -97,7 +97,7 @@ public class NewtonsoftJsonConfigurationSerializer : IConfigurationSerializer
         private void VisitArray(JArray? array)
         {
             if (array is null) return;
-                
+
             for (var index = 0; index < array.Count; index++)
             {
                 EnterContext(index.ToString());
@@ -109,7 +109,7 @@ public class NewtonsoftJsonConfigurationSerializer : IConfigurationSerializer
         private void VisitPrimitive(JValue? data)
         {
             if (data is null) return;
-                
+
             var key = _currentPath;
 
             if (_data.ContainsKey(key))

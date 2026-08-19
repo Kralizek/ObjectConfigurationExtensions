@@ -10,16 +10,16 @@ public class CustomAutoDataAttribute : AutoDataAttribute
 {
     public CustomAutoDataAttribute() : base(FixtureHelper.CreateFixture)
     {
-            
+
     }
 }
 
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
 public class CustomInlineAutoDataAttribute : InlineAutoDataAttribute
 {
-    public CustomInlineAutoDataAttribute(params object[] arguments) : base(FixtureHelper.CreateFixture, arguments)
+    public CustomInlineAutoDataAttribute(params object?[] arguments) : base(FixtureHelper.CreateFixture, arguments)
     {
-            
+
     }
 }
 

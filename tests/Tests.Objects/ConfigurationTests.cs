@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.Extensions.Configuration;
 using NUnit.Framework;
 
@@ -69,7 +69,8 @@ public class ConfigurationTests
 
         var result = configuration.Get<ObjectWithSimpleProperties>();
 
-        Assert.That(result.Text, Is.EqualTo(testSource.Text));
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result!.Text, Is.EqualTo(testSource.Text));
         Assert.That(result.Value, Is.EqualTo(testSource.Value));
     }
 
@@ -82,7 +83,8 @@ public class ConfigurationTests
 
         var result = configuration.Get<ObjectWithInnerObject>();
 
-        Assert.That(result.InnerObject.Text, Is.EqualTo(testSource.InnerObject.Text));
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result!.InnerObject.Text, Is.EqualTo(testSource.InnerObject.Text));
         Assert.That(result.InnerObject.Value, Is.EqualTo(testSource.InnerObject.Value));
     }
 
@@ -95,7 +97,8 @@ public class ConfigurationTests
 
         var result = configuration.Get<ObjectWithSimpleStringArray>();
 
-        Assert.That(result.Texts, Is.EquivalentTo(testSource.Texts));
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result!.Texts, Is.EquivalentTo(testSource.Texts));
     }
 
     [Test, CustomAutoData]
@@ -107,7 +110,8 @@ public class ConfigurationTests
 
         var result = configuration.Get<ObjectWithSimpleIntArray>();
 
-        Assert.That(result.Values, Is.EquivalentTo(testSource.Values));
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result!.Values, Is.EquivalentTo(testSource.Values));
     }
 
     [Test, CustomAutoData]
@@ -119,25 +123,27 @@ public class ConfigurationTests
 
         var result = configuration.Get<ObjectWithComplexArray>();
 
-        Assert.That(result.Items, Is.EquivalentTo(testSource.Items).Using((Func<ObjectWithSimpleProperties, ObjectWithSimpleProperties, bool>)Comparison));
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result!.Items, Is.EquivalentTo(testSource.Items).Using((Func<ObjectWithSimpleProperties, ObjectWithSimpleProperties, bool>)Comparison));
     }
 
     bool Comparison(ObjectWithSimpleProperties first, ObjectWithSimpleProperties second) => first.Text == second.Text && first.Value == second.Value;
 
-        
+
     [Test, CustomAutoData]
     [Property("Issue", "3")]
     public void Null_values_should_not_override_existing_values(ConfigurationBuilder configurationBuilder, ObjectWithSimpleProperties testSource)
     {
         configurationBuilder.AddObject(testSource);
 
-        configurationBuilder.AddObject(new ObjectWithSimpleProperties{ Text = null, Value = testSource.Value });
+        configurationBuilder.AddObject(new ObjectWithSimpleProperties { Text = null, Value = testSource.Value });
 
         var configuration = configurationBuilder.Build();
 
         var result = configuration.Get<ObjectWithSimpleProperties>();
 
-        Assert.That(result.Text, Is.EqualTo(testSource.Text));
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result!.Text, Is.EqualTo(testSource.Text));
         Assert.That(result.Value, Is.EqualTo(testSource.Value));
     }
 
@@ -147,12 +153,13 @@ public class ConfigurationTests
     {
         configurationBuilder.AddObject(testSource);
 
-        configurationBuilder.AddObject(new ObjectWithSimpleIntArray { Values = new int[0] });
+        configurationBuilder.AddObject(new ObjectWithSimpleIntArray { Values = Array.Empty<int>() });
 
         var configuration = configurationBuilder.Build();
 
         var result = configuration.Get<ObjectWithSimpleIntArray>();
 
-        Assert.That(result.Values, Is.EquivalentTo(testSource.Values));
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result!.Values, Is.EquivalentTo(testSource.Values));
     }
 }

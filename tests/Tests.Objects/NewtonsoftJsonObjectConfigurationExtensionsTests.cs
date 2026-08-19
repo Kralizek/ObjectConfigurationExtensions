@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Kralizek.Extensions.Configuration.Internal;
 using Microsoft.Extensions.Configuration;
 using Moq;
@@ -11,9 +11,9 @@ namespace Tests;
 public class NewtonsoftJsonObjectConfigurationExtensionsTests
 {
     [Test]
-    [CustomInlineAutoData((object)null)]
+    [CustomInlineAutoData((object?)null)]
     [CustomInlineAutoData]
-    public void AddObject_returns_ConfigurationBuilder(object testSource, IConfigurationBuilder configurationBuilder, string rootSectionName)
+    public void AddObject_returns_ConfigurationBuilder(object? testSource, IConfigurationBuilder configurationBuilder, string rootSectionName)
     {
         var output = NewtonsoftJsonObjectConfigurationExtensions.AddObjectWithNewtonsoftJson(configurationBuilder, testSource, rootSectionName);
 
@@ -31,7 +31,7 @@ public class NewtonsoftJsonObjectConfigurationExtensionsTests
     [Test, CustomAutoData]
     public void AddObject_does_nothing_when_source_is_null(IConfigurationBuilder configurationBuilder, string rootSectionName)
     {
-        NewtonsoftJsonObjectConfigurationExtensions.AddObjectWithNewtonsoftJson(configurationBuilder, null!, rootSectionName);
+        NewtonsoftJsonObjectConfigurationExtensions.AddObjectWithNewtonsoftJson(configurationBuilder, null, rootSectionName);
 
         Mock.Get(configurationBuilder).Verify(p => p.Add(It.IsAny<IConfigurationSource>()), Times.Never);
     }

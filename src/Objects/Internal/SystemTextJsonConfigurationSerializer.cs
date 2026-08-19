@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Extensions.Configuration;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.Extensions.Configuration;
 
 namespace Kralizek.Extensions.Configuration.Internal;
 
@@ -13,7 +13,7 @@ public class SystemTextJsonConfigurationSerializer : IConfigurationSerializer
     {
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
-        
+
     public IDictionary<string, string?> Serialize(object source, string rootSectionName)
     {
         var json = JsonSerializer.Serialize(source, JsonOptions);

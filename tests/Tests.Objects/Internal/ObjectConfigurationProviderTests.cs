@@ -1,4 +1,4 @@
-﻿using AutoFixture.Idioms;
+using AutoFixture.Idioms;
 using AutoFixture.NUnit3;
 using Kralizek.Extensions.Configuration;
 using Kralizek.Extensions.Configuration.Internal;
