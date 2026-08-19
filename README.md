@@ -1,6 +1,4 @@
-<a href="https://www.buymeacoffee.com/rengol"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a pizza&emoji=🍕&slug=rengol&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" /></a>
-
-[![Build status](https://ci.appveyor.com/api/projects/status/5l2nwpit63j19rhd/branch/master?svg=true)](https://ci.appveyor.com/project/Kralizek/objectconfigurationextensions/branch/master) [![NuGet version](https://img.shields.io/nuget/vpre/Kralizek.Extensions.Configuration.Objects.svg)](https://www.nuget.org/packages/Kralizek.Extensions.Configuration.Objects)
+[![CI](https://github.com/Kralizek/ObjectConfigurationExtensions/actions/workflows/ci.yml/badge.svg)](https://github.com/Kralizek/ObjectConfigurationExtensions/actions/workflows/ci.yml) [![NuGet version](https://img.shields.io/nuget/vpre/Kralizek.Extensions.Configuration.Objects.svg)](https://www.nuget.org/packages/Kralizek.Extensions.Configuration.Objects)
 
 # ObjectConfigurationExtensions
 
@@ -10,7 +8,7 @@ The library supports all primitive types, complex objects and sequences of both.
 
 ## How to use it
 
-Let's see it in action. Here is a simple ASP.NET Core application that loads an object in the configuration pipeline, specifically in the `Test` section.
+Here is a simple ASP.NET Core application that loads an object in the configuration pipeline, specifically in the `Test` section.
 
 ```csharp
 var builder = WebApplication.CreateBuilder(args);
@@ -40,34 +38,15 @@ app.Run();
 public record ComplexObject(string Text, int Number);
 ```
 
-You can install the package using the .NET CLI
+Install the package using the .NET CLI:
 
 ```bash
-$ dotnet add package Kralizek.Extensions.Configuration.Objects
-```
-
-When accessed at the root page, the application prints all the configuration values found in the `Test` section.
-
-```bash
-$ curl http://localhost:5003
-{
-  "Test":null,
-  "Test:Flag":"true",
-  "Test:ManyValues":null,
-  "Test:ManyValues:0":null,
-  "Test:ManyValues:0:Number":"234",
-  "Test:ManyValues:0:Text":"New value",
-  "Test:ManyValues:1":null,
-  "Test:ManyValues:1:Number":"345",
-  "Test:ManyValues:1:Text":"Another value",
-  "Test:Text":"Something",
-  "Test:Value":"123"
-}
+dotnet add package Kralizek.Extensions.Configuration.Objects
 ```
 
 ## Root section name
 
-The root section name used in the sample above is optional. If you prefer so, you can add the properties of the object directly to the root of the configuration.
+The root section name is optional. To add the properties directly to the root configuration:
 
 ```csharp
 builder.Configuration.AddObject(new
@@ -78,41 +57,22 @@ builder.Configuration.AddObject(new
 
 ## Newtonsoft.Json serializer
 
-The library uses by default the JSON serializer available in the `System.Text.Json` namespace.
-
-If you need to use the JSON serializer from Newtonsoft, you can install the specific package and use the `AddObjectWithNewtonsoftJson` method.
+The library uses System.Text.Json by default. Consumers that need Newtonsoft.Json can install the companion package and use `AddObjectWithNewtonsoftJson`.
 
 ```bash
 dotnet add package Kralizek.Extensions.Configuration.Objects.NewtonsoftJson
 ```
 
 ```csharp
-var builder = WebApplication.CreateBuilder(args);
-
 builder.Configuration.AddObjectWithNewtonsoftJson(new
 {
     Text = "Something"
 }, "Test");
-
-var app = builder.Build();
-
-app.MapGet("/", (IConfiguration configuration) => configuration
-    .GetSection("Test")
-    .AsEnumerable()
-    .OrderBy(c => c.Key)
-    .ToDictionary(c => c.Key, v => v.Value));
-
-
-app.Run();
 ```
 
 ## Custom serializer
 
-The serialization strategy doesn't play an important role in the library. 
-
-Yet, in case of need, a custom serializer implementing the interface `Kralizek.Extensions.Configuration.IConfigurationSerializer` can be provided.
-
-The interface is very minimal and requires to write the object as a `Dictionary<string, string?>` where the key is the path to the property and the value is the value of the property.
+A custom serializer can implement `Kralizek.Extensions.Configuration.IConfigurationSerializer` and provide configuration keys and values directly.
 
 ```csharp
 public interface IConfigurationSerializer
@@ -121,52 +81,24 @@ public interface IConfigurationSerializer
 }
 ```
 
-Let's assume we have a custom implementation
+Pass it to `AddObject`:
 
 ```csharp
-public class FailingConfigurationSerializer : IConfigurationSerializer
-{
-    public IDictionary<string, string?> Serialize(object source, string rootSectionName) => throw new NotImplementedException();
-}
-```
-
-We can use it by passing an instance of the custom serializer to the `AddObject` method.
-
-```csharp
-var builder = WebApplication.CreateBuilder(args);
-
 var serializer = new FailingConfigurationSerializer();
-
-builder.Configuration.AddObject(new
-{
-    Text = "Something"
-}, serializer, "Test");
-
-var app = builder.Build();
-
-app.MapGet("/", (IConfiguration configuration) => configuration
-    .GetSection("Test")
-    .AsEnumerable()
-    .OrderBy(c => c.Key)
-    .ToDictionary(c => c.Key, v => v.Value));
-
-
-app.Run();
+builder.Configuration.AddObject(serializer, new { Text = "Something" }, "Test");
 ```
 
-## Versioning
+## Versioning and prereleases
 
-This library follows [Semantic Versioning 2.0.0](http://semver.org/spec/v2.0.0.html) for the public releases (published to the [nuget.org](https://www.nuget.org/)).
+The library follows Semantic Versioning. Stable releases are published from GitHub Releases. Maintainer-triggered prereleases use `alpha`, `beta`, and `rc` channels; alpha packages remain on GitHub Packages while beta and RC packages are also published to NuGet.org.
 
-## How to build
+## Building
 
-This project uses [Cake](https://cakebuild.net/) as a build engine.
+The repository uses the .NET SDK directly.
 
-If you would like to build this project locally, just execute the `build.cake` script.
-
-You can do it by using the .NET tool created by CAKE authors and use it to execute the build script.
-
-```powershell
-dotnet tool install -g Cake.Tool
-dotnet cake
+```bash
+dotnet restore
+dotnet build --configuration Release
+dotnet test --configuration Release
+dotnet pack --configuration Release
 ```

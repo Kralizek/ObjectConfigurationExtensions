@@ -1,45 +1,21 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="../../eng/Package.props" />
 
   <PropertyGroup>
     <RootNamespace>Kralizek.Extensions.Configuration</RootNamespace>
     <AssemblyName>$(RootNamespace).$(MSBuildProjectName)</AssemblyName>
-    <LangVersion>latest</LangVersion>
     <TargetFrameworks>netstandard2.0;net6.0;net8.0</TargetFrameworks>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+    <IsPackable>true</IsPackable>
 
-  <PropertyGroup>
-    <Authors>Renato Golia</Authors>    
-  </PropertyGroup>
-
-  <PropertyGroup>
     <PackageId>$(AssemblyName)</PackageId>
-    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/Kralizek/ObjectConfigurationExtensions</PackageProjectUrl>
     <PackageTags>dotnet-standard;microsoft;extensions;configuration;objects;</PackageTags>
     <Description>Provider implementation for Microsoft.Extensions.Configuration to support concrete objects.</Description>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-  </PropertyGroup>
-
   <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All"/>
-    <PackageReference Include="SourceLink.Copy.PdbFiles" Version="2.8.3" PrivateAssets="All" />
-  </ItemGroup>
-
-  <ItemGroup>
-    
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
-    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" />
+    <PackageReference Include="System.Text.Json" />
   </ItemGroup>
 
 </Project>

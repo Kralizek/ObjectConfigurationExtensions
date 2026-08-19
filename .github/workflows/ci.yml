@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  CONFIGURATION: Release
+
+jobs:
+  build-and-test:
+    name: Build and test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+          cache: true
+          cache-dependency-path: |
+            **/*.csproj
+            **/*.props
+            **/*.targets
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Verify formatting
+        run: dotnet format --verify-no-changes --no-restore
+
+      - name: Build
+        run: dotnet build --configuration $CONFIGURATION --no-restore --warnaserror
+
+      - name: Test
+        run: dotnet test --configuration $CONFIGURATION --no-build --logger GitHubActions
+
+      - name: Pack
+        run: dotnet pack --configuration $CONFIGURATION --no-build --output ./artifacts/packages
+
+      - name: Verify package versions
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          versions_file=$(mktemp)
+          for package in ./artifacts/packages/Kralizek.Extensions.Configuration.Objects*.nupkg; do
+            nuspec=$(unzip -p "$package" '*.nuspec')
+            package_id=$(printf '%s\n' "$nuspec" | sed -n 's:.*<id>\(.*\)</id>.*:\1:p' | head -n 1)
+            package_version=$(printf '%s\n' "$nuspec" | sed -n 's:.*<version>\(.*\)</version>.*:\1:p' | head -n 1)
+            printf '%-60s %s\n' "$package_id" "$package_version"
+            echo "$package_version" >> "$versions_file"
+          done
+
+          test "$(sort -u "$versions_file" | sed '/^$/d' | wc -l)" -eq 1
