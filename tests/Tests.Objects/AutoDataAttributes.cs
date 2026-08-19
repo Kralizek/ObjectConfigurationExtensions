@@ -10,7 +10,7 @@ public class CustomAutoDataAttribute : AutoDataAttribute
 {
     public CustomAutoDataAttribute() : base(FixtureHelper.CreateFixture)
     {
-            
+
     }
 }
 
@@ -19,7 +19,7 @@ public class CustomInlineAutoDataAttribute : InlineAutoDataAttribute
 {
     public CustomInlineAutoDataAttribute(params object[] arguments) : base(FixtureHelper.CreateFixture, arguments)
     {
-            
+
     }
 }
 

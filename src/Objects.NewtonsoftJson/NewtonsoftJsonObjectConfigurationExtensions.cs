@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Kralizek.Extensions.Configuration.Internal;
 
 // ReSharper disable CheckNamespace

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.Extensions.Configuration;
 using NUnit.Framework;
 
@@ -124,14 +124,14 @@ public class ConfigurationTests
 
     bool Comparison(ObjectWithSimpleProperties first, ObjectWithSimpleProperties second) => first.Text == second.Text && first.Value == second.Value;
 
-        
+
     [Test, CustomAutoData]
     [Property("Issue", "3")]
     public void Null_values_should_not_override_existing_values(ConfigurationBuilder configurationBuilder, ObjectWithSimpleProperties testSource)
     {
         configurationBuilder.AddObject(testSource);
 
-        configurationBuilder.AddObject(new ObjectWithSimpleProperties{ Text = null, Value = testSource.Value });
+        configurationBuilder.AddObject(new ObjectWithSimpleProperties { Text = null, Value = testSource.Value });
 
         var configuration = configurationBuilder.Build();
 

@@ -1,4 +1,4 @@
-﻿using AutoFixture.Idioms;
+using AutoFixture.Idioms;
 using Kralizek.Extensions.Configuration.Internal;
 using NUnit.Framework;
 
@@ -13,7 +13,7 @@ public class SystemTextJsonConfigurationSerializerTests
         assertion.Verify(typeof(SystemTextJsonConfigurationSerializer).GetConstructors());
     }
 
-    [Test, CustomAutoData] 
+    [Test, CustomAutoData]
     public void Object_is_correctly_serialized(SystemTextJsonConfigurationSerializer sut, ObjectWithSimpleProperties testSource, string rootSectionName)
     {
         var result = sut.Serialize(testSource, rootSectionName);

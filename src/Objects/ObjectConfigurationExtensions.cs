@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Kralizek.Extensions.Configuration;
 using Kralizek.Extensions.Configuration.Internal;
 
@@ -19,7 +19,7 @@ public static class ObjectConfigurationExtensions
 
         return configurationBuilder;
     }
-        
+
     public static IConfigurationBuilder AddObject(this IConfigurationBuilder configurationBuilder, object? objectToAdd, string? rootSectionName = "")
     {
         var serializer = new SystemTextJsonConfigurationSerializer();

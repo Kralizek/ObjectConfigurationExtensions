@@ -1,4 +1,4 @@
-﻿using AutoFixture.Idioms;
+using AutoFixture.Idioms;
 using Kralizek.Extensions.Configuration.Internal;
 using Microsoft.Extensions.Configuration;
 using NUnit.Framework;
@@ -11,14 +11,14 @@ public class ObjectConfigurationSourceTests
     [Test, CustomAutoData]
     public void Constructor_is_guarded(GuardClauseAssertion assertion)
     {
-            assertion.Verify(typeof(ObjectConfigurationSource).GetConstructors());
-        }
+        assertion.Verify(typeof(ObjectConfigurationSource).GetConstructors());
+    }
 
     [Test, CustomAutoData]
     public void Build_creates_a_provider(ObjectConfigurationSource sut, IConfigurationBuilder configurationBuilder)
     {
-            var provider = sut.Build(configurationBuilder);
+        var provider = sut.Build(configurationBuilder);
 
-            Assert.That(provider, Is.InstanceOf<ObjectConfigurationProvider>());
-        }
+        Assert.That(provider, Is.InstanceOf<ObjectConfigurationProvider>());
+    }
 }
