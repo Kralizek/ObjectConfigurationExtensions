@@ -3,32 +3,45 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 using Microsoft.Extensions.Configuration;
 
 namespace Kralizek.Extensions.Configuration.Internal;
 
-public class SystemTextJsonConfigurationSerializer : IConfigurationSerializer
+internal static class SystemTextJsonConfigurationSerializer
 {
-    private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions
+    private static readonly JsonSerializerOptions JsonOptions = new()
     {
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
 
-    public IDictionary<string, string?> Serialize(object source, string rootSectionName)
+    public static IDictionary<string, string?> Serialize<T>(T source, string rootSectionName)
     {
         var json = JsonSerializer.Serialize(source, JsonOptions);
-        var jsonConfig = JsonDocument.Parse(json).RootElement;
 
-        var visitor = new JsonVisitor();
-
-        return visitor.ParseObject(jsonConfig, rootSectionName);
+        return Flatten(json, rootSectionName);
     }
 
-    private class JsonVisitor
+    public static IDictionary<string, string?> Serialize<T>(T source, JsonTypeInfo<T> jsonTypeInfo, string rootSectionName)
+    {
+        var json = JsonSerializer.Serialize(source, jsonTypeInfo);
+
+        return Flatten(json, rootSectionName);
+    }
+
+    private static IDictionary<string, string?> Flatten(string json, string rootSectionName)
+    {
+        using var document = JsonDocument.Parse(json);
+        var visitor = new JsonVisitor();
+
+        return visitor.ParseObject(document.RootElement, rootSectionName);
+    }
+
+    private sealed class JsonVisitor
     {
         private readonly IDictionary<string, string?> _data = new SortedDictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
         private readonly Stack<string> _context = new();
-        private string _currentPath = null!;
+        private string _currentPath = string.Empty;
 
         public IDictionary<string, string?> ParseObject(JsonElement jsonObject, string rootSectionName)
         {
@@ -55,7 +68,7 @@ public class SystemTextJsonConfigurationSerializer : IConfigurationSerializer
                     foreach (var property in element.EnumerateObject())
                     {
                         EnterContext(property.Name);
-                        VisitProperty(property);
+                        VisitElement(property.Value);
                         ExitContext();
                     }
                     break;
@@ -85,11 +98,6 @@ public class SystemTextJsonConfigurationSerializer : IConfigurationSerializer
             }
         }
 
-        private void VisitProperty(JsonProperty property)
-        {
-            VisitElement(property.Value);
-        }
-
         private void VisitPrimitive(JsonElement data)
         {
             var key = _currentPath;
@@ -112,7 +120,7 @@ public class SystemTextJsonConfigurationSerializer : IConfigurationSerializer
 
             if (!string.IsNullOrEmpty(stringValue))
             {
-                _data[key] = stringValue!;
+                _data[key] = stringValue;
             }
         }
 
