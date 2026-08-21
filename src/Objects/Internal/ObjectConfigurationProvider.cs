@@ -1,24 +1,21 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
 
 namespace Kralizek.Extensions.Configuration.Internal;
 
-public class ObjectConfigurationProvider : ConfigurationProvider
+internal sealed class ObjectConfigurationProvider : ConfigurationProvider
 {
-    private readonly string _rootSectionName;
-    private readonly object _source;
-    private readonly IConfigurationSerializer _serializer;
+    private readonly Func<IDictionary<string, string?>> _dataFactory;
 
-    public ObjectConfigurationProvider(IConfigurationSerializer serializer, object source, string rootSectionName)
+    public ObjectConfigurationProvider(Func<IDictionary<string, string?>> dataFactory)
     {
-        _rootSectionName = rootSectionName ?? throw new ArgumentNullException(nameof(rootSectionName));
-        _source = source ?? throw new ArgumentNullException(nameof(source));
-        _serializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
+        _dataFactory = dataFactory ?? throw new ArgumentNullException(nameof(dataFactory));
     }
 
     public override void Load()
     {
-        Data = _serializer.Serialize(_source, _rootSectionName);
+        Data = _dataFactory();
 
         base.Load();
     }
