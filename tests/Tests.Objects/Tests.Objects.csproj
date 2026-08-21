@@ -20,7 +20,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../src/Objects.NewtonsoftJson/Objects.NewtonsoftJson.csproj" />
     <ProjectReference Include="../../src/Objects/Objects.csproj" />
   </ItemGroup>
 
