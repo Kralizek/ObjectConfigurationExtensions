@@ -16,7 +16,10 @@ public static class ObjectConfigurationExtensions
 
     public static IConfigurationBuilder AddObject<T>(this IConfigurationBuilder configurationBuilder, T? objectToAdd, JsonTypeInfo<T> jsonTypeInfo, string? rootSectionName = "")
     {
-        ArgumentNullException.ThrowIfNull(jsonTypeInfo);
+        if (jsonTypeInfo is null)
+        {
+            throw new ArgumentNullException(nameof(jsonTypeInfo));
+        }
 
         return AddObject(configurationBuilder, objectToAdd, rootSectionName, (value, rootSection) => SystemTextJsonConfigurationSerializer.Serialize(value, jsonTypeInfo, rootSection));
     }
@@ -28,14 +31,20 @@ public static class ObjectConfigurationExtensions
 
     public static IConfigurationBuilder AddObjectAsFallback<T>(this IConfigurationBuilder configurationBuilder, T? objectToAdd, JsonTypeInfo<T> jsonTypeInfo, string? rootSectionName = "")
     {
-        ArgumentNullException.ThrowIfNull(jsonTypeInfo);
+        if (jsonTypeInfo is null)
+        {
+            throw new ArgumentNullException(nameof(jsonTypeInfo));
+        }
 
         return AddObjectAsFallback(configurationBuilder, objectToAdd, rootSectionName, (value, rootSection) => SystemTextJsonConfigurationSerializer.Serialize(value, jsonTypeInfo, rootSection));
     }
 
     private static IConfigurationBuilder AddObject<T>(IConfigurationBuilder configurationBuilder, T? objectToAdd, string? rootSectionName, Func<T, string, IDictionary<string, string?>> serialize)
     {
-        ArgumentNullException.ThrowIfNull(configurationBuilder);
+        if (configurationBuilder is null)
+        {
+            throw new ArgumentNullException(nameof(configurationBuilder));
+        }
 
         if (objectToAdd is null)
         {
@@ -49,7 +58,10 @@ public static class ObjectConfigurationExtensions
 
     private static IConfigurationBuilder AddObjectAsFallback<T>(IConfigurationBuilder configurationBuilder, T? objectToAdd, string? rootSectionName, Func<T, string, IDictionary<string, string?>> serialize)
     {
-        ArgumentNullException.ThrowIfNull(configurationBuilder);
+        if (configurationBuilder is null)
+        {
+            throw new ArgumentNullException(nameof(configurationBuilder));
+        }
 
         if (objectToAdd is null)
         {
