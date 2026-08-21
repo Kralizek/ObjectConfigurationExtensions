@@ -1,14 +1,20 @@
-[![CI](https://github.com/Kralizek/ObjectConfigurationExtensions/actions/workflows/ci.yml/badge.svg)](https://github.com/Kralizek/ObjectConfigurationExtensions/actions/workflows/ci.yml) [![NuGet version](https://img.shields.io/nuget/vpre/Kralizek.Extensions.Configuration.Objects.svg)](https://www.nuget.org/packages/Kralizek.Extensions.Configuration.Objects)
+[![CI](https://github.com/Kralizek/ObjectConfigurationExtensions/actions/workflows/ci.yml/badge.svg)](https://github.com/Kralizek/ObjectConfigurationExtensions/actions/workflows/ci.yml) [![NuGet](https://img.shields.io/nuget/v/Kralizek.Extensions.Configuration.Objects.svg)](https://www.nuget.org/packages/Kralizek.Extensions.Configuration.Objects) [![NuGet prerelease](https://img.shields.io/nuget/vpre/Kralizek.Extensions.Configuration.Objects.svg?label=prerelease)](https://www.nuget.org/packages/Kralizek.Extensions.Configuration.Objects) [![NuGet downloads](https://img.shields.io/nuget/dt/Kralizek.Extensions.Configuration.Objects.svg)](https://www.nuget.org/packages/Kralizek.Extensions.Configuration.Objects)
 
 # ObjectConfigurationExtensions
 
-This repository contains a provider for [Microsoft.Extensions.Configuration](https://www.nuget.org/packages/Microsoft.Extensions.Configuration/) that allows the insertion of a concrete object into the configuration pipeline.
+ObjectConfigurationExtensions is a configuration provider for `Microsoft.Extensions.Configuration` that lets you add a concrete object directly to the configuration pipeline.
 
-The library supports primitive types, complex objects, and sequences of both.
+The library supports primitive values, complex objects, and sequences, and targets both `netstandard2.0` and `net10.0`.
 
-## How to use it
+## Install
 
-Here is a simple ASP.NET Core application that loads an object in the configuration pipeline, specifically in the `Test` section.
+```bash
+dotnet add package Kralizek.Extensions.Configuration.Objects
+```
+
+## Add an object to configuration
+
+`AddObject` follows the normal configuration-provider convention: the object provider is appended to the pipeline, so it has higher precedence than providers registered before it.
 
 ```csharp
 var builder = WebApplication.CreateBuilder(args);
@@ -38,12 +44,6 @@ app.Run();
 public record ComplexObject(string Text, int Number);
 ```
 
-Install the package using the .NET CLI:
-
-```bash
-dotnet add package Kralizek.Extensions.Configuration.Objects
-```
-
 ## Root section name
 
 The root section name is optional. To add the properties directly to the root configuration:
@@ -55,9 +55,7 @@ builder.Configuration.AddObject(new
 });
 ```
 
-## Using an object as fallback configuration
-
-`AddObject` follows the normal configuration-provider convention and appends the object provider, giving it higher precedence than providers already registered.
+## Use an object as fallback configuration
 
 Use `AddObjectAsFallback` when the object contains defaults that should be overridden by the rest of the configuration pipeline:
 
@@ -76,7 +74,7 @@ The fallback provider is inserted at the beginning of the provider chain, so lat
 
 ## Source-generated System.Text.Json metadata
 
-Both `AddObject` and `AddObjectAsFallback` have overloads accepting `JsonTypeInfo<T>`. Use these overloads when reflection-based System.Text.Json serialization is not appropriate, including trimming and Native AOT scenarios.
+Both `AddObject` and `AddObjectAsFallback` have overloads accepting `JsonTypeInfo<T>`. Use them when reflection-based System.Text.Json serialization is not appropriate, including trimming and Native AOT scenarios.
 
 ```csharp
 [JsonSerializable(typeof(MySettings))]
@@ -87,7 +85,29 @@ builder.Configuration.AddObject(
     AppJsonContext.Default.MySettings);
 ```
 
-The reflection and `JsonTypeInfo<T>` overloads use the same configuration flattening implementation.
+The reflection and `JsonTypeInfo<T>` overloads use the same configuration-flattening implementation.
+
+## API
+
+```csharp
+IConfigurationBuilder AddObject<T>(
+    T? value,
+    string? rootSectionName = "");
+
+IConfigurationBuilder AddObject<T>(
+    T? value,
+    JsonTypeInfo<T> jsonTypeInfo,
+    string? rootSectionName = "");
+
+IConfigurationBuilder AddObjectAsFallback<T>(
+    T? value,
+    string? rootSectionName = "");
+
+IConfigurationBuilder AddObjectAsFallback<T>(
+    T? value,
+    JsonTypeInfo<T> jsonTypeInfo,
+    string? rootSectionName = "");
+```
 
 ## Versioning and prereleases
 
