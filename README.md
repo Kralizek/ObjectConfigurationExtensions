@@ -4,7 +4,7 @@
 
 This repository contains a provider for [Microsoft.Extensions.Configuration](https://www.nuget.org/packages/Microsoft.Extensions.Configuration/) that allows the insertion of a concrete object into the configuration pipeline.
 
-The library supports all primitive types, complex objects and sequences of both.
+The library supports primitive types, complex objects, and sequences of both.
 
 ## How to use it
 
@@ -18,8 +18,8 @@ builder.Configuration.AddObject(new
     Value = 123,
     ManyValues = new ComplexObject[]
     {
-        new ("New value", 234),
-        new ("Another value", 345)
+        new("New value", 234),
+        new("Another value", 345)
     },
     Flag = true,
     Text = "Something"
@@ -55,38 +55,39 @@ builder.Configuration.AddObject(new
 });
 ```
 
-## Newtonsoft.Json serializer
+## Using an object as fallback configuration
 
-The library uses System.Text.Json by default. Consumers that need Newtonsoft.Json can install the companion package and use `AddObjectWithNewtonsoftJson`.
+`AddObject` follows the normal configuration-provider convention and appends the object provider, giving it higher precedence than providers already registered.
 
-```bash
-dotnet add package Kralizek.Extensions.Configuration.Objects.NewtonsoftJson
-```
+Use `AddObjectAsFallback` when the object contains defaults that should be overridden by the rest of the configuration pipeline:
 
 ```csharp
-builder.Configuration.AddObjectWithNewtonsoftJson(new
-{
-    Text = "Something"
-}, "Test");
+builder.Configuration
+    .AddObjectAsFallback(new
+    {
+        FeatureEnabled = false,
+        RetryCount = 3
+    })
+    .AddJsonFile("appsettings.json")
+    .AddEnvironmentVariables();
 ```
 
-## Custom serializer
+The fallback provider is inserted at the beginning of the provider chain, so later providers win.
 
-A custom serializer can implement `Kralizek.Extensions.Configuration.IConfigurationSerializer` and provide configuration keys and values directly.
+## Source-generated System.Text.Json metadata
+
+Both `AddObject` and `AddObjectAsFallback` have overloads accepting `JsonTypeInfo<T>`. Use these overloads when reflection-based System.Text.Json serialization is not appropriate, including trimming and Native AOT scenarios.
 
 ```csharp
-public interface IConfigurationSerializer
-{
-    IDictionary<string, string?> Serialize(object source, string rootSectionName);
-}
+[JsonSerializable(typeof(MySettings))]
+internal partial class AppJsonContext : JsonSerializerContext;
+
+builder.Configuration.AddObject(
+    new MySettings { FeatureEnabled = true },
+    AppJsonContext.Default.MySettings);
 ```
 
-Pass it to `AddObject`:
-
-```csharp
-var serializer = new FailingConfigurationSerializer();
-builder.Configuration.AddObject(serializer, new { Text = "Something" }, "Test");
-```
+The reflection and `JsonTypeInfo<T>` overloads use the same configuration flattening implementation.
 
 ## Versioning and prereleases
 
