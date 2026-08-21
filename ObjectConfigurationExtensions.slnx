@@ -1,11 +1,9 @@
 <Solution>
   <Folder Name="/samples/">
-    <Project Path="samples/AspNetCoreNewtonsoftJsonSample/AspNetCoreNewtonsoftJsonSample.csproj" />
     <Project Path="samples/AspNetCoreNoRootSectionSample/AspNetCoreNoRootSectionSample.csproj" />
     <Project Path="samples/AspNetCoreSample/AspNetCoreSample.csproj" />
   </Folder>
   <Folder Name="/src/">
-    <Project Path="src/Objects.NewtonsoftJson/Objects.NewtonsoftJson.csproj" />
     <Project Path="src/Objects/Objects.csproj" />
   </Folder>
   <Folder Name="/tests/">
