@@ -1,14 +1,20 @@
-[![CI](https://github.com/Kralizek/ObjectConfigurationExtensions/actions/workflows/ci.yml/badge.svg)](https://github.com/Kralizek/ObjectConfigurationExtensions/actions/workflows/ci.yml) [![NuGet version](https://img.shields.io/nuget/vpre/Kralizek.Extensions.Configuration.Objects.svg)](https://www.nuget.org/packages/Kralizek.Extensions.Configuration.Objects)
+[![CI](https://github.com/Kralizek/ObjectConfigurationExtensions/actions/workflows/ci.yml/badge.svg)](https://github.com/Kralizek/ObjectConfigurationExtensions/actions/workflows/ci.yml) [![NuGet](https://img.shields.io/nuget/v/Kralizek.Extensions.Configuration.Objects.svg)](https://www.nuget.org/packages/Kralizek.Extensions.Configuration.Objects) [![NuGet prerelease](https://img.shields.io/nuget/vpre/Kralizek.Extensions.Configuration.Objects.svg?label=prerelease)](https://www.nuget.org/packages/Kralizek.Extensions.Configuration.Objects) [![NuGet downloads](https://img.shields.io/nuget/dt/Kralizek.Extensions.Configuration.Objects.svg)](https://www.nuget.org/packages/Kralizek.Extensions.Configuration.Objects)
 
 # ObjectConfigurationExtensions
 
-This repository contains a provider for [Microsoft.Extensions.Configuration](https://www.nuget.org/packages/Microsoft.Extensions.Configuration/) that allows the insertion of a concrete object into the configuration pipeline.
+ObjectConfigurationExtensions is a configuration provider for `Microsoft.Extensions.Configuration` that lets you add a concrete object directly to the configuration pipeline.
 
-The library supports all primitive types, complex objects and sequences of both.
+The library supports primitive values, complex objects, and sequences, and targets both `netstandard2.0` and `net10.0`.
 
-## How to use it
+## Install
 
-Here is a simple ASP.NET Core application that loads an object in the configuration pipeline, specifically in the `Test` section.
+```bash
+dotnet add package Kralizek.Extensions.Configuration.Objects
+```
+
+## Add an object to configuration
+
+`AddObject` follows the normal configuration-provider convention: the object provider is appended to the pipeline, so it has higher precedence than providers registered before it.
 
 ```csharp
 var builder = WebApplication.CreateBuilder(args);
@@ -18,8 +24,8 @@ builder.Configuration.AddObject(new
     Value = 123,
     ManyValues = new ComplexObject[]
     {
-        new ("New value", 234),
-        new ("Another value", 345)
+        new("New value", 234),
+        new("Another value", 345)
     },
     Flag = true,
     Text = "Something"
@@ -38,12 +44,6 @@ app.Run();
 public record ComplexObject(string Text, int Number);
 ```
 
-Install the package using the .NET CLI:
-
-```bash
-dotnet add package Kralizek.Extensions.Configuration.Objects
-```
-
 ## Root section name
 
 The root section name is optional. To add the properties directly to the root configuration:
@@ -55,37 +55,58 @@ builder.Configuration.AddObject(new
 });
 ```
 
-## Newtonsoft.Json serializer
+## Use an object as fallback configuration
 
-The library uses System.Text.Json by default. Consumers that need Newtonsoft.Json can install the companion package and use `AddObjectWithNewtonsoftJson`.
-
-```bash
-dotnet add package Kralizek.Extensions.Configuration.Objects.NewtonsoftJson
-```
+Use `AddObjectAsFallback` when the object contains defaults that should be overridden by the rest of the configuration pipeline:
 
 ```csharp
-builder.Configuration.AddObjectWithNewtonsoftJson(new
-{
-    Text = "Something"
-}, "Test");
+builder.Configuration
+    .AddObjectAsFallback(new
+    {
+        FeatureEnabled = false,
+        RetryCount = 3
+    })
+    .AddJsonFile("appsettings.json")
+    .AddEnvironmentVariables();
 ```
 
-## Custom serializer
+The fallback provider is inserted at the beginning of the provider chain, so later providers win.
 
-A custom serializer can implement `Kralizek.Extensions.Configuration.IConfigurationSerializer` and provide configuration keys and values directly.
+## Source-generated System.Text.Json metadata
+
+Both `AddObject` and `AddObjectAsFallback` have overloads accepting `JsonTypeInfo<T>`. Use them when reflection-based System.Text.Json serialization is not appropriate, including trimming and Native AOT scenarios.
 
 ```csharp
-public interface IConfigurationSerializer
-{
-    IDictionary<string, string?> Serialize(object source, string rootSectionName);
-}
+[JsonSerializable(typeof(MySettings))]
+internal partial class AppJsonContext : JsonSerializerContext;
+
+builder.Configuration.AddObject(
+    new MySettings { FeatureEnabled = true },
+    AppJsonContext.Default.MySettings);
 ```
 
-Pass it to `AddObject`:
+The reflection and `JsonTypeInfo<T>` overloads use the same configuration-flattening implementation.
+
+## API
 
 ```csharp
-var serializer = new FailingConfigurationSerializer();
-builder.Configuration.AddObject(serializer, new { Text = "Something" }, "Test");
+IConfigurationBuilder AddObject<T>(
+    T? value,
+    string? rootSectionName = "");
+
+IConfigurationBuilder AddObject<T>(
+    T? value,
+    JsonTypeInfo<T> jsonTypeInfo,
+    string? rootSectionName = "");
+
+IConfigurationBuilder AddObjectAsFallback<T>(
+    T? value,
+    string? rootSectionName = "");
+
+IConfigurationBuilder AddObjectAsFallback<T>(
+    T? value,
+    JsonTypeInfo<T> jsonTypeInfo,
+    string? rootSectionName = "");
 ```
 
 ## Versioning and prereleases
