@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using Kralizek.Extensions.Configuration.Internal;
@@ -60,6 +61,23 @@ public class JsonConfigurationFlattenerTests
         Assert.That(result["Defaults:Null"], Is.Null);
         Assert.That(result["Defaults:Empty"], Is.EqualTo(string.Empty));
         Assert.That(result["Defaults:Text"], Is.EqualTo(string.Empty));
+    }
+
+    [TestCase("42")]
+    [TestCase("[]")]
+    [TestCase("null")]
+    [TestCase("\"value\"")]
+    public void Non_object_root_without_root_section_is_rejected(string json)
+    {
+        Assert.That(() => Flatten(json), Throws.TypeOf<FormatException>());
+    }
+
+    [Test]
+    public void Non_object_root_with_root_section_is_supported()
+    {
+        var result = Flatten("42", "Value");
+
+        Assert.That(result["Value"], Is.EqualTo("42"));
     }
 
     private static IDictionary<string, string?> Flatten(string json, string rootSectionName = "")
