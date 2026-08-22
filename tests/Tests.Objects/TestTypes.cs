@@ -33,7 +33,7 @@ public class ObjectWithNullableValues
 
     public int? Number { get; set; } = 123;
 
-    public string?[]? Values { get; set; } = ["Initial"];
+    public string?[]? Values { get; set; }
 
-    public string[]? EmptyValues { get; set; } = ["Initial"];
+    public string[]? EmptyValues { get; set; }
 }
