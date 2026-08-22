@@ -52,12 +52,36 @@ public class ConfigurationTests
         Assert.That(result.Value, Is.EqualTo(source.Value));
     }
 
-    [TestCaseSource(nameof(IntListCases))]
-    public void Integer_list_supports_multiple_arities(int[] values)
+    [TestCaseSource(nameof(IntArrayCases))]
+    public void Integer_array_supports_multiple_arities(int[] values)
+    {
+        var result = Bind(new ObjectWithIntArray { Values = values });
+
+        Assert.That(result.Values, Is.EqualTo(values));
+    }
+
+    [Test]
+    public void String_array_preserves_null_and_empty_elements()
+    {
+        var result = Bind(new ObjectWithStringArray { Values = ["one", null, "", "four"] });
+
+        Assert.That(result.Values, Is.EqualTo(new string?[] { "one", null, "", "four" }));
+    }
+
+    [TestCaseSource(nameof(NonEmptyIntListCases))]
+    public void Integer_list_supports_multiple_non_empty_arities(int[] values)
     {
         var result = Bind(new ObjectWithIntList { Values = [.. values] });
 
         Assert.That(result.Values, Is.EqualTo(values));
+    }
+
+    [Test]
+    public void Empty_list_remains_null()
+    {
+        var result = Bind(new ObjectWithStringList { Values = [] });
+
+        Assert.That(result.Values, Is.Null);
     }
 
     [Test]
@@ -131,12 +155,11 @@ public class ConfigurationTests
     }
 
     [Test]
-    public void Empty_maps_are_bound_as_empty()
+    public void Empty_map_remains_null()
     {
         var result = Bind(new ObjectWithStringMap { Values = [] });
 
-        Assert.That(result.Values, Is.Not.Null);
-        Assert.That(result.Values, Is.Empty);
+        Assert.That(result.Values, Is.Null);
     }
 
     [Test]
@@ -223,15 +246,6 @@ public class ConfigurationTests
     }
 
     [Test]
-    public void Empty_list_is_bound_as_empty()
-    {
-        var result = Bind(new ObjectWithStringList { Values = [] });
-
-        Assert.That(result.Values, Is.Not.Null);
-        Assert.That(result.Values, Is.Empty);
-    }
-
-    [Test]
     public void Empty_list_does_not_remove_lower_precedence_child_keys()
     {
         var configuration = new ConfigurationBuilder()
@@ -275,9 +289,16 @@ public class ConfigurationTests
         Assert.That(result!.Values, Is.EqualTo(source.Values));
     }
 
-    private static IEnumerable<int[]> IntListCases()
+    private static IEnumerable<int[]> IntArrayCases()
     {
         yield return [];
+        yield return [1];
+        yield return [1, 2];
+        yield return [1, 2, 3];
+    }
+
+    private static IEnumerable<int[]> NonEmptyIntListCases()
+    {
         yield return [1];
         yield return [1, 2];
         yield return [1, 2, 3];
