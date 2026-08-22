@@ -151,7 +151,24 @@ public class ConfigurationTests
     }
 
     [Test]
-    public void Empty_arrays_override_existing_arrays()
+    public void Empty_arrays_are_bound_as_empty()
+    {
+        var configuration = new ConfigurationBuilder()
+            .AddObject(new ObjectWithNullableValues
+            {
+                EmptyValues = []
+            })
+            .Build();
+
+        var result = configuration.Get<ObjectWithNullableValues>();
+
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result!.EmptyValues, Is.Not.Null);
+        Assert.That(result.EmptyValues, Is.Empty);
+    }
+
+    [Test]
+    public void Empty_arrays_follow_configuration_child_key_merge_semantics()
     {
         var configuration = new ConfigurationBuilder()
             .AddObject(new ObjectWithNullableValues
@@ -167,8 +184,7 @@ public class ConfigurationTests
         var result = configuration.Get<ObjectWithNullableValues>();
 
         Assert.That(result, Is.Not.Null);
-        Assert.That(result!.EmptyValues, Is.Not.Null);
-        Assert.That(result.EmptyValues, Is.Empty);
+        Assert.That(result!.EmptyValues, Is.EqualTo(new[] { "Initial" }));
     }
 
     [Test]
