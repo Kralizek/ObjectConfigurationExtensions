@@ -127,39 +127,113 @@ public class ConfigurationTests
         Assert.That(result!.Items, Is.EquivalentTo(testSource.Items).Using((Func<ObjectWithSimpleProperties, ObjectWithSimpleProperties, bool>)Comparison));
     }
 
-    bool Comparison(ObjectWithSimpleProperties first, ObjectWithSimpleProperties second) => first.Text == second.Text && first.Value == second.Value;
-
-
-    [Test, CustomAutoData]
-    [Property("Issue", "3")]
-    public void Null_values_should_not_override_existing_values(ConfigurationBuilder configurationBuilder, ObjectWithSimpleProperties testSource)
+    [Test]
+    public void Null_values_override_existing_values()
     {
-        configurationBuilder.AddObject(testSource);
+        var configuration = new ConfigurationBuilder()
+            .AddObject(new ObjectWithNullableValues
+            {
+                Text = "Initial",
+                Number = 123
+            })
+            .AddObject(new ObjectWithNullableValues
+            {
+                Text = null,
+                Number = null
+            })
+            .Build();
 
-        configurationBuilder.AddObject(new ObjectWithSimpleProperties { Text = null, Value = testSource.Value });
-
-        var configuration = configurationBuilder.Build();
-
-        var result = configuration.Get<ObjectWithSimpleProperties>();
+        var result = configuration.Get<ObjectWithNullableValues>();
 
         Assert.That(result, Is.Not.Null);
-        Assert.That(result!.Text, Is.EqualTo(testSource.Text));
-        Assert.That(result.Value, Is.EqualTo(testSource.Value));
+        Assert.That(result!.Text, Is.Null);
+        Assert.That(result.Number, Is.Null);
     }
 
-    [Test, CustomAutoData]
-    [Property("Issue", "3")]
-    public void Null_values_should_not_override_existing_values(ConfigurationBuilder configurationBuilder, ObjectWithSimpleIntArray testSource)
+    [Test]
+    public void Empty_arrays_override_existing_arrays()
     {
-        configurationBuilder.AddObject(testSource);
+        var configuration = new ConfigurationBuilder()
+            .AddObject(new ObjectWithNullableValues
+            {
+                EmptyValues = ["Initial"]
+            })
+            .AddObject(new ObjectWithNullableValues
+            {
+                EmptyValues = []
+            })
+            .Build();
 
-        configurationBuilder.AddObject(new ObjectWithSimpleIntArray { Values = Array.Empty<int>() });
-
-        var configuration = configurationBuilder.Build();
-
-        var result = configuration.Get<ObjectWithSimpleIntArray>();
+        var result = configuration.Get<ObjectWithNullableValues>();
 
         Assert.That(result, Is.Not.Null);
-        Assert.That(result!.Values, Is.EquivalentTo(testSource.Values));
+        Assert.That(result!.EmptyValues, Is.Not.Null);
+        Assert.That(result.EmptyValues, Is.Empty);
     }
+
+    [Test]
+    public void Null_array_elements_are_bound()
+    {
+        var configuration = new ConfigurationBuilder()
+            .AddObject(new ObjectWithNullableValues
+            {
+                Values = [null, "one"]
+            })
+            .Build();
+
+        var result = configuration.Get<ObjectWithNullableValues>();
+
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result!.Values, Is.EqualTo(new string?[] { null, "one" }));
+    }
+
+    [Test]
+    public void Source_generated_serialization_preserves_modern_semantics()
+    {
+        var source = new ObjectWithNullableValues
+        {
+            Text = null,
+            Number = null,
+            Values = [null, "one"],
+            EmptyValues = []
+        };
+
+        var configuration = new ConfigurationBuilder()
+            .AddObject(source, TestJsonContext.Default.ObjectWithNullableValues)
+            .Build();
+
+        var result = configuration.Get<ObjectWithNullableValues>();
+
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result!.Text, Is.Null);
+        Assert.That(result.Number, Is.Null);
+        Assert.That(result.Values, Is.EqualTo(new string?[] { null, "one" }));
+        Assert.That(result.EmptyValues, Is.Not.Null);
+        Assert.That(result.EmptyValues, Is.Empty);
+    }
+
+    [Test]
+    public void Fallback_semantic_values_do_not_override_later_providers()
+    {
+        var configuration = new ConfigurationBuilder()
+            .AddObjectAsFallback(new ObjectWithNullableValues
+            {
+                Text = null,
+                EmptyValues = []
+            })
+            .AddObject(new ObjectWithNullableValues
+            {
+                Text = "Configured",
+                EmptyValues = ["Configured"]
+            })
+            .Build();
+
+        var result = configuration.Get<ObjectWithNullableValues>();
+
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result!.Text, Is.EqualTo("Configured"));
+        Assert.That(result.EmptyValues, Is.EqualTo(new[] { "Configured" }));
+    }
+
+    private static bool Comparison(ObjectWithSimpleProperties first, ObjectWithSimpleProperties second) => first.Text == second.Text && first.Value == second.Value;
 }
