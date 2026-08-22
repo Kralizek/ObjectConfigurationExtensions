@@ -35,6 +35,6 @@ public class SystemTextJsonConfigurationSerializerTests
         var reflection = SystemTextJsonConfigurationSerializer.Serialize(source);
         var sourceGenerated = SystemTextJsonConfigurationSerializer.Serialize(source, TestJsonContext.Default.ObjectWithStringList);
 
-        Assert.That(sourceGenerated.GetRawText(), Is.EqualTo(reflection.GetRawText()));
+        Assert.That(JsonElement.DeepEquals(sourceGenerated, reflection), Is.True);
     }
 }
