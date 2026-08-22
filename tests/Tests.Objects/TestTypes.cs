@@ -1,39 +1,86 @@
 namespace Tests;
 
-public class ObjectWithSimpleProperties
+public class ObjectWithScalarInt
 {
-    public string? Text { get; set; }
-
     public int Value { get; set; }
 }
 
-public class ObjectWithSimpleStringArray
+public class ObjectWithScalarNullableInt
 {
-    public string[] Texts { get; set; } = null!;
+    public int? Value { get; set; }
 }
 
-public class ObjectWithSimpleIntArray
+public class ObjectWithScalarString
 {
-    public int[] Values { get; set; } = null!;
+    public string? Value { get; set; }
 }
 
-public class ObjectWithComplexArray
+public class ObjectWithScalarTimeSpan
 {
-    public ObjectWithSimpleProperties[] Items { get; set; } = null!;
+    public TimeSpan Value { get; set; }
 }
 
-public class ObjectWithInnerObject
+public class ObjectWithIntList
 {
-    public ObjectWithSimpleProperties InnerObject { get; set; } = null!;
+    public List<int>? Values { get; set; }
 }
 
-public class ObjectWithNullableValues
+public class ObjectWithNullableIntList
 {
-    public string? Text { get; set; } = "Initial";
+    public List<int?>? Values { get; set; }
+}
 
-    public int? Number { get; set; } = 123;
+public class ObjectWithStringList
+{
+    public List<string?>? Values { get; set; }
+}
 
-    public string?[]? Values { get; set; }
+public class ObjectWithIntMap
+{
+    public Dictionary<string, int>? Values { get; set; }
+}
 
-    public string[]? EmptyValues { get; set; }
+public class ObjectWithNullableIntMap
+{
+    public Dictionary<string, int?>? Values { get; set; }
+}
+
+public class ObjectWithStringMap
+{
+    public Dictionary<string, string?>? Values { get; set; }
+}
+
+public class ObjectWithTwoScalars
+{
+    public int Count { get; set; }
+
+    public string? Name { get; set; }
+}
+
+public class ObjectWithThreeScalars
+{
+    public int Count { get; set; }
+
+    public string? Name { get; set; }
+
+    public TimeSpan Timeout { get; set; }
+}
+
+public class ObjectWithTwoCollections
+{
+    public List<int>? Numbers { get; set; }
+
+    public List<string?>? Names { get; set; }
+}
+
+public class ObjectWithCollectionAndMap
+{
+    public List<string?>? Names { get; set; }
+
+    public Dictionary<string, int>? Scores { get; set; }
+}
+
+public class ObjectWithNestedObject
+{
+    public ObjectWithThreeScalars? Nested { get; set; }
 }
