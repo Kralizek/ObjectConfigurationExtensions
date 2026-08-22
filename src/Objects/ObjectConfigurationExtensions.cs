@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 using Kralizek.Extensions.Configuration.Internal;
 
@@ -11,7 +12,7 @@ public static class ObjectConfigurationExtensions
 {
     public static IConfigurationBuilder AddObject<T>(this IConfigurationBuilder configurationBuilder, T? objectToAdd, string? rootSectionName = "")
     {
-        return AddObject(configurationBuilder, objectToAdd, rootSectionName, static (value, rootSection) => SystemTextJsonConfigurationSerializer.Serialize(value, rootSection));
+        return AddObject(configurationBuilder, objectToAdd, rootSectionName, static value => SystemTextJsonConfigurationSerializer.Serialize(value));
     }
 
     public static IConfigurationBuilder AddObject<T>(this IConfigurationBuilder configurationBuilder, T? objectToAdd, JsonTypeInfo<T> jsonTypeInfo, string? rootSectionName = "")
@@ -21,12 +22,12 @@ public static class ObjectConfigurationExtensions
             throw new ArgumentNullException(nameof(jsonTypeInfo));
         }
 
-        return AddObject(configurationBuilder, objectToAdd, rootSectionName, (value, rootSection) => SystemTextJsonConfigurationSerializer.Serialize(value, jsonTypeInfo, rootSection));
+        return AddObject(configurationBuilder, objectToAdd, rootSectionName, value => SystemTextJsonConfigurationSerializer.Serialize(value, jsonTypeInfo));
     }
 
     public static IConfigurationBuilder AddObjectAsFallback<T>(this IConfigurationBuilder configurationBuilder, T? objectToAdd, string? rootSectionName = "")
     {
-        return AddObjectAsFallback(configurationBuilder, objectToAdd, rootSectionName, static (value, rootSection) => SystemTextJsonConfigurationSerializer.Serialize(value, rootSection));
+        return AddObjectAsFallback(configurationBuilder, objectToAdd, rootSectionName, static value => SystemTextJsonConfigurationSerializer.Serialize(value));
     }
 
     public static IConfigurationBuilder AddObjectAsFallback<T>(this IConfigurationBuilder configurationBuilder, T? objectToAdd, JsonTypeInfo<T> jsonTypeInfo, string? rootSectionName = "")
@@ -36,10 +37,10 @@ public static class ObjectConfigurationExtensions
             throw new ArgumentNullException(nameof(jsonTypeInfo));
         }
 
-        return AddObjectAsFallback(configurationBuilder, objectToAdd, rootSectionName, (value, rootSection) => SystemTextJsonConfigurationSerializer.Serialize(value, jsonTypeInfo, rootSection));
+        return AddObjectAsFallback(configurationBuilder, objectToAdd, rootSectionName, value => SystemTextJsonConfigurationSerializer.Serialize(value, jsonTypeInfo));
     }
 
-    private static IConfigurationBuilder AddObject<T>(IConfigurationBuilder configurationBuilder, T? objectToAdd, string? rootSectionName, Func<T, string, IDictionary<string, string?>> serialize)
+    private static IConfigurationBuilder AddObject<T>(IConfigurationBuilder configurationBuilder, T? objectToAdd, string? rootSectionName, Func<T, JsonElement> serialize)
     {
         if (configurationBuilder is null)
         {
@@ -51,12 +52,12 @@ public static class ObjectConfigurationExtensions
             return configurationBuilder;
         }
 
-        configurationBuilder.Add(new ObjectConfigurationSource(() => serialize(objectToAdd, rootSectionName ?? string.Empty)));
+        configurationBuilder.Add(CreateSource(objectToAdd, rootSectionName, serialize));
 
         return configurationBuilder;
     }
 
-    private static IConfigurationBuilder AddObjectAsFallback<T>(IConfigurationBuilder configurationBuilder, T? objectToAdd, string? rootSectionName, Func<T, string, IDictionary<string, string?>> serialize)
+    private static IConfigurationBuilder AddObjectAsFallback<T>(IConfigurationBuilder configurationBuilder, T? objectToAdd, string? rootSectionName, Func<T, JsonElement> serialize)
     {
         if (configurationBuilder is null)
         {
@@ -68,8 +69,20 @@ public static class ObjectConfigurationExtensions
             return configurationBuilder;
         }
 
-        configurationBuilder.Sources.Insert(0, new ObjectConfigurationSource(() => serialize(objectToAdd, rootSectionName ?? string.Empty)));
+        configurationBuilder.Sources.Insert(0, CreateSource(objectToAdd, rootSectionName, serialize));
 
         return configurationBuilder;
+    }
+
+    private static ObjectConfigurationSource CreateSource<T>(T objectToAdd, string? rootSectionName, Func<T, JsonElement> serialize)
+    {
+        var rootSection = rootSectionName ?? string.Empty;
+
+        return new ObjectConfigurationSource(() =>
+        {
+            var json = serialize(objectToAdd);
+
+            return JsonConfigurationFlattener.Flatten(json, rootSection);
+        });
     }
 }
