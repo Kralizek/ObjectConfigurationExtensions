@@ -11,6 +11,11 @@ internal static class JsonConfigurationFlattener
 {
     public static IDictionary<string, string?> Flatten(JsonElement element, string rootSectionName)
     {
+        if (string.IsNullOrEmpty(rootSectionName) && element.ValueKind != JsonValueKind.Object)
+        {
+            throw new FormatException($"A top-level JSON value of kind '{element.ValueKind}' is not supported without a root section.");
+        }
+
         var visitor = new JsonVisitor();
 
         return visitor.Flatten(element, rootSectionName);
