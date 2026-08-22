@@ -12,7 +12,7 @@ public class SystemTextJsonObjectConfigurationExtensionsTests
     {
         var builder = new ConfigurationBuilder();
 
-        var result = builder.AddObject<ObjectWithSimpleProperties>(null);
+        var result = builder.AddObject<ObjectWithTwoScalars>(null);
 
         Assert.That(result, Is.SameAs(builder));
         Assert.That(builder.Sources, Is.Empty);
@@ -24,14 +24,14 @@ public class SystemTextJsonObjectConfigurationExtensionsTests
         var builder = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
-                [nameof(ObjectWithSimpleProperties.Text)] = "existing"
+                [nameof(ObjectWithTwoScalars.Name)] = "existing"
             });
 
-        builder.AddObject(new ObjectWithSimpleProperties { Text = "object", Value = 42 });
+        builder.AddObject(new ObjectWithTwoScalars { Name = "object", Count = 42 });
 
         var configuration = builder.Build();
 
-        Assert.That(configuration[nameof(ObjectWithSimpleProperties.Text)], Is.EqualTo("object"));
+        Assert.That(configuration[nameof(ObjectWithTwoScalars.Name)], Is.EqualTo("object"));
     }
 
     [Test]
@@ -40,41 +40,41 @@ public class SystemTextJsonObjectConfigurationExtensionsTests
         var builder = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
-                [nameof(ObjectWithSimpleProperties.Text)] = "existing"
+                [nameof(ObjectWithTwoScalars.Name)] = "existing"
             });
 
-        builder.AddObjectAsFallback(new ObjectWithSimpleProperties { Text = "fallback", Value = 42 });
+        builder.AddObjectAsFallback(new ObjectWithTwoScalars { Name = "fallback", Count = 42 });
 
         var configuration = builder.Build();
 
-        Assert.That(configuration[nameof(ObjectWithSimpleProperties.Text)], Is.EqualTo("existing"));
-        Assert.That(configuration[nameof(ObjectWithSimpleProperties.Value)], Is.EqualTo("42"));
+        Assert.That(configuration[nameof(ObjectWithTwoScalars.Name)], Is.EqualTo("existing"));
+        Assert.That(configuration[nameof(ObjectWithTwoScalars.Count)], Is.EqualTo("42"));
     }
 
     [Test]
     public void JsonTypeInfo_overload_matches_reflection_overload()
     {
-        var source = new ObjectWithSimpleProperties { Text = "hello", Value = 42 };
+        var source = new ObjectWithTwoScalars { Name = "hello", Count = 42 };
 
         var reflectionConfiguration = new ConfigurationBuilder()
             .AddObject(source, "Root")
             .Build();
 
         var sourceGeneratedConfiguration = new ConfigurationBuilder()
-            .AddObject(source, TestJsonContext.Default.ObjectWithSimpleProperties, "Root")
+            .AddObject(source, TestJsonContext.Default.ObjectWithTwoScalars, "Root")
             .Build();
 
-        Assert.That(sourceGeneratedConfiguration["Root:Text"], Is.EqualTo(reflectionConfiguration["Root:Text"]));
-        Assert.That(sourceGeneratedConfiguration["Root:Value"], Is.EqualTo(reflectionConfiguration["Root:Value"]));
+        Assert.That(sourceGeneratedConfiguration["Root:Name"], Is.EqualTo(reflectionConfiguration["Root:Name"]));
+        Assert.That(sourceGeneratedConfiguration["Root:Count"], Is.EqualTo(reflectionConfiguration["Root:Count"]));
     }
 
     [Test]
     public void Fallback_JsonTypeInfo_overload_matches_reflection_overload()
     {
-        var source = new ObjectWithSimpleProperties { Text = "fallback", Value = 42 };
+        var source = new ObjectWithTwoScalars { Name = "fallback", Count = 42 };
         var values = new Dictionary<string, string?>
         {
-            [nameof(ObjectWithSimpleProperties.Text)] = "existing"
+            [nameof(ObjectWithTwoScalars.Name)] = "existing"
         };
 
         var reflectionConfiguration = new ConfigurationBuilder()
@@ -84,23 +84,23 @@ public class SystemTextJsonObjectConfigurationExtensionsTests
 
         var sourceGeneratedConfiguration = new ConfigurationBuilder()
             .AddInMemoryCollection(values)
-            .AddObjectAsFallback(source, TestJsonContext.Default.ObjectWithSimpleProperties)
+            .AddObjectAsFallback(source, TestJsonContext.Default.ObjectWithTwoScalars)
             .Build();
 
-        Assert.That(sourceGeneratedConfiguration[nameof(ObjectWithSimpleProperties.Text)], Is.EqualTo(reflectionConfiguration[nameof(ObjectWithSimpleProperties.Text)]));
-        Assert.That(sourceGeneratedConfiguration[nameof(ObjectWithSimpleProperties.Value)], Is.EqualTo(reflectionConfiguration[nameof(ObjectWithSimpleProperties.Value)]));
+        Assert.That(sourceGeneratedConfiguration[nameof(ObjectWithTwoScalars.Name)], Is.EqualTo(reflectionConfiguration[nameof(ObjectWithTwoScalars.Name)]));
+        Assert.That(sourceGeneratedConfiguration[nameof(ObjectWithTwoScalars.Count)], Is.EqualTo(reflectionConfiguration[nameof(ObjectWithTwoScalars.Count)]));
     }
 
     [Test]
     public void Serialization_is_deferred_until_configuration_is_built()
     {
-        var source = new ObjectWithSimpleProperties { Text = "before", Value = 42 };
+        var source = new ObjectWithTwoScalars { Name = "before", Count = 42 };
         var builder = new ConfigurationBuilder().AddObject(source);
 
-        source.Text = "after";
+        source.Name = "after";
 
         var configuration = builder.Build();
 
-        Assert.That(configuration[nameof(ObjectWithSimpleProperties.Text)], Is.EqualTo("after"));
+        Assert.That(configuration[nameof(ObjectWithTwoScalars.Name)], Is.EqualTo("after"));
     }
 }
