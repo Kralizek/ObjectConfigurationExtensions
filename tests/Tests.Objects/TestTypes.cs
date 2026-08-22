@@ -23,6 +23,16 @@ public class ObjectWithScalarTimeSpan
     public TimeSpan Value { get; set; }
 }
 
+public class ObjectWithIntArray
+{
+    public int[]? Values { get; set; }
+}
+
+public class ObjectWithStringArray
+{
+    public string?[]? Values { get; set; }
+}
+
 public class ObjectWithIntList
 {
     public List<int>? Values { get; set; }
