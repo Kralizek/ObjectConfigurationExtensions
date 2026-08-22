@@ -97,3 +97,12 @@ public class ObjectWithNestedObject
 {
     public ObjectWithThreeScalars? Nested { get; set; }
 }
+
+public class ObjectWithEmptyNestedObject
+{
+    public EmptyObject? Nested { get; set; }
+}
+
+public class EmptyObject
+{
+}
