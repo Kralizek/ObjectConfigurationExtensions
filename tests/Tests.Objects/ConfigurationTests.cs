@@ -246,6 +246,41 @@ public class ConfigurationTests
     }
 
     [Test]
+    public void Empty_nested_object_remains_null()
+    {
+        var result = Bind(new ObjectWithEmptyNestedObject { Nested = new EmptyObject() });
+
+        Assert.That(result.Nested, Is.Null);
+    }
+
+    [Test]
+    public void Empty_nested_object_does_not_remove_lower_precedence_child_keys()
+    {
+        var configured = new ObjectWithNestedObject
+        {
+            Nested = new ObjectWithThreeScalars
+            {
+                Count = 3,
+                Name = "configured",
+                Timeout = TimeSpan.FromSeconds(15)
+            }
+        };
+
+        var configuration = new ConfigurationBuilder()
+            .AddObject(configured)
+            .AddObject(new ObjectWithEmptyNestedObject { Nested = new EmptyObject() })
+            .Build();
+
+        var result = configuration.Get<ObjectWithNestedObject>();
+
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result!.Nested, Is.Not.Null);
+        Assert.That(result.Nested!.Count, Is.EqualTo(configured.Nested.Count));
+        Assert.That(result.Nested.Name, Is.EqualTo(configured.Nested.Name));
+        Assert.That(result.Nested.Timeout, Is.EqualTo(configured.Nested.Timeout));
+    }
+
+    [Test]
     public void Empty_list_does_not_remove_lower_precedence_child_keys()
     {
         var configuration = new ConfigurationBuilder()
