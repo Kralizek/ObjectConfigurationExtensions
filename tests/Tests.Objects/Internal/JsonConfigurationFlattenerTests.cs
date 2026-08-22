@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Text.Json;
 using Kralizek.Extensions.Configuration.Internal;
 using NUnit.Framework;
