@@ -92,7 +92,7 @@ public class SystemTextJsonObjectConfigurationExtensionsTests
     }
 
     [Test]
-    public void Serialization_is_deferred_until_configuration_is_built()
+    public void Serialization_captures_object_state_when_source_is_registered()
     {
         var source = new ObjectWithTwoScalars { Name = "before", Count = 42 };
         var builder = new ConfigurationBuilder().AddObject(source);
@@ -101,6 +101,6 @@ public class SystemTextJsonObjectConfigurationExtensionsTests
 
         var configuration = builder.Build();
 
-        Assert.That(configuration[nameof(ObjectWithTwoScalars.Name)], Is.EqualTo("after"));
+        Assert.That(configuration[nameof(ObjectWithTwoScalars.Name)], Is.EqualTo("before"));
     }
 }
