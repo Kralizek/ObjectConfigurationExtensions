@@ -143,6 +143,25 @@ public class ObjectConfigurationIntegrationTests
     }
 
     [Test]
+    public void Scalar_value_with_root_section_is_supported()
+    {
+        var configuration = new ConfigurationBuilder()
+            .AddObject(42, "Value")
+            .Build();
+
+        Assert.That(configuration["Value"], Is.EqualTo("42"));
+    }
+
+    [Test]
+    public void Scalar_value_without_root_section_is_rejected()
+    {
+        var builder = new ConfigurationBuilder()
+            .AddObject(42);
+
+        Assert.That(() => builder.Build(), Throws.TypeOf<FormatException>());
+    }
+
+    [Test]
     public void Nested_object_can_bind_to_an_equivalent_different_type()
     {
         var source = new IntegrationNestedSource
