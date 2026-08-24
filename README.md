@@ -2,9 +2,9 @@
 
 # ObjectConfigurationExtensions
 
-ObjectConfigurationExtensions is a configuration provider for `Microsoft.Extensions.Configuration` that lets you add a concrete object directly to the configuration pipeline.
+ObjectConfigurationExtensions lets you add a concrete object directly to `Microsoft.Extensions.Configuration`.
 
-The library supports primitive values, complex objects, and sequences, and targets both `netstandard2.0` and `net10.0`.
+The library supports object graphs containing scalar values, nested objects, collections, and dictionaries, and targets both `netstandard2.0` and `net10.0`.
 
 ## Install
 
@@ -14,7 +14,7 @@ dotnet add package Kralizek.Extensions.Configuration.Objects
 
 ## Add an object to configuration
 
-`AddObject` follows the normal configuration-provider convention: the object provider is appended to the pipeline, so it has higher precedence than providers registered before it.
+`AddObject` follows the normal configuration-provider convention: the object is added with higher precedence than providers registered before it.
 
 ```csharp
 var builder = WebApplication.CreateBuilder(args);
@@ -55,22 +55,31 @@ builder.Configuration.AddObject(new
 });
 ```
 
-## Use an object as fallback configuration
-
-Use `AddObjectAsFallback` when the object contains defaults that should be overridden by the rest of the configuration pipeline:
+Configuration paths can also be used as root section names:
 
 ```csharp
-builder.Configuration
-    .AddObjectAsFallback(new
-    {
-        FeatureEnabled = false,
-        RetryCount = 3
-    })
-    .AddJsonFile("appsettings.json")
-    .AddEnvironmentVariables();
+builder.Configuration.AddObject(
+    new { Enabled = true },
+    "Features:Payments");
 ```
 
-The fallback provider is inserted at the beginning of the provider chain, so later providers win.
+The value is then available as `Features:Payments:Enabled`.
+
+## Use an object as fallback configuration
+
+Use `AddObjectAsFallback` when the object contains defaults that should be overridden by the configuration already registered by the host:
+
+```csharp
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Configuration.AddObjectAsFallback(new
+{
+    FeatureEnabled = false,
+    RetryCount = 3
+});
+```
+
+The fallback is inserted at the lowest precedence, so `appsettings.json`, environment variables, command-line arguments, and any other higher-precedence providers can override those values. This is true even when `AddObjectAsFallback` is called after those providers have already been registered.
 
 ## Source-generated System.Text.Json metadata
 
@@ -84,8 +93,6 @@ builder.Configuration.AddObject(
     new MySettings { FeatureEnabled = true },
     AppJsonContext.Default.MySettings);
 ```
-
-The reflection and `JsonTypeInfo<T>` overloads use the same configuration-flattening implementation.
 
 ## API
 
@@ -111,7 +118,7 @@ IConfigurationBuilder AddObjectAsFallback<T>(
 
 ## Versioning and prereleases
 
-The library follows Semantic Versioning. Stable releases are published from GitHub Releases. Maintainer-triggered prereleases use `alpha`, `beta`, and `rc` channels; alpha packages remain on GitHub Packages while beta and RC packages are also published to NuGet.org.
+The library follows Semantic Versioning. Stable releases and public prereleases are published to NuGet.org.
 
 ## Building
 
