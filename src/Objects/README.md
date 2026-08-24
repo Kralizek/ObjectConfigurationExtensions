@@ -2,6 +2,8 @@
 
 Add strongly typed objects directly to a `Microsoft.Extensions.Configuration` pipeline.
 
+The library supports object graphs containing scalar values, nested objects, collections, and dictionaries.
+
 ## Install
 
 ```bash
@@ -18,34 +20,43 @@ builder.Configuration.AddObject(new
 });
 ```
 
+`AddObject` appends the object configuration source, so it has higher precedence than configuration providers already registered.
+
+## Root section name
+
 You can place the object under a root section:
 
 ```csharp
 builder.Configuration.AddObject(settings, "MySettings");
 ```
 
-`AddObject` appends the provider, so it has higher precedence than configuration providers already registered.
+The root section can also be a configuration path:
+
+```csharp
+builder.Configuration.AddObject(settings, "Features:Payments");
+```
+
+This makes the object available under `Features:Payments`.
 
 ## Add fallback defaults
 
-Use `AddObjectAsFallback` when the object should provide defaults that other providers can override:
+Use `AddObjectAsFallback` when the object should provide defaults that the rest of the configuration pipeline can override:
 
 ```csharp
-builder.Configuration
-    .AddObjectAsFallback(new
-    {
-        FeatureEnabled = false,
-        RetryCount = 3
-    })
-    .AddJsonFile("appsettings.json")
-    .AddEnvironmentVariables();
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Configuration.AddObjectAsFallback(new
+{
+    FeatureEnabled = false,
+    RetryCount = 3
+});
 ```
 
-The object provider is inserted at the beginning of the provider chain, so later providers win.
+The fallback source is inserted at the lowest precedence, even when other providers are already registered. Values from `appsettings.json`, environment variables, command-line arguments, and other higher-precedence providers can override the defaults.
 
 ## Source-generated System.Text.Json
 
-Both APIs have overloads accepting `JsonTypeInfo<T>`, which can be used with System.Text.Json source generation for trimming and Native AOT scenarios.
+Both APIs have overloads accepting `JsonTypeInfo<T>`. Use them with System.Text.Json source generation when reflection-based serialization is not appropriate, including trimming and Native AOT scenarios.
 
 ```csharp
 [JsonSerializable(typeof(MySettings))]
