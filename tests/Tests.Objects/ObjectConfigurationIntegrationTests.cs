@@ -98,6 +98,70 @@ public class ObjectConfigurationIntegrationTests
     }
 
     [Test]
+    public void Multi_level_root_section_exposes_expected_configuration_keys()
+    {
+        var source = new ObjectWithTwoScalars
+        {
+            Count = 3,
+            Name = "payments"
+        };
+
+        var configuration = new ConfigurationBuilder()
+            .AddObject(source, "Features:Payments")
+            .Build();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(configuration["Features:Payments:Count"], Is.EqualTo("3"));
+            Assert.That(configuration["Features:Payments:Name"], Is.EqualTo("payments"));
+        });
+    }
+
+    [Test]
+    public void Multi_level_root_section_with_json_type_info_binds_from_the_expected_section()
+    {
+        var source = new ObjectWithTwoScalars
+        {
+            Count = 5,
+            Name = "source-generated"
+        };
+
+        var configuration = new ConfigurationBuilder()
+            .AddObject(source, TestJsonContext.Default.ObjectWithTwoScalars, "Features:Payments")
+            .Build();
+
+        var result = configuration
+            .GetSection("Features:Payments")
+            .Get<ObjectWithTwoScalars>();
+
+        Assert.That(result, Is.Not.Null);
+        Assert.Multiple(() =>
+        {
+            Assert.That(result!.Count, Is.EqualTo(source.Count));
+            Assert.That(result.Name, Is.EqualTo(source.Name));
+        });
+    }
+
+    [Test]
+    public void Scalar_value_with_root_section_is_supported()
+    {
+        var configuration = new ConfigurationBuilder()
+            .AddObject(42, "Value")
+            .Build();
+
+        Assert.That(configuration["Value"], Is.EqualTo("42"));
+    }
+
+    [Test]
+    public void Scalar_value_without_root_section_is_rejected()
+    {
+        var builder = new ConfigurationBuilder()
+            .AddObject(42);
+
+        Assert.That(() => builder.Build(), Throws.TypeOf<FormatException>());
+    }
+
+    [Test]
     public void Nested_object_can_bind_to_an_equivalent_different_type()
     {
         var source = new IntegrationNestedSource
