@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## Unreleased
+## 4.0.0 - 2026-08-27
 
 - Repository modernization for the next major version.
 - Removed the Newtonsoft.Json companion package and custom serializer abstraction.
