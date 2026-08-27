@@ -8,6 +8,19 @@ updates:
       nuget-dependencies:
         patterns:
           - "*"
+    ignore:
+      - dependency-name: NUnit
+        update-types:
+          - version-update:semver-major
+      - dependency-name: NUnit3TestAdapter
+        update-types:
+          - version-update:semver-major
+      - dependency-name: "AutoFixture*"
+        update-types:
+          - version-update:semver-major
+      - dependency-name: Moq
+        update-types:
+          - version-update:semver-major
 
   - package-ecosystem: github-actions
     directory: /
