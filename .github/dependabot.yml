@@ -15,16 +15,7 @@ updates:
       - dependency-name: NUnit3TestAdapter
         update-types:
           - version-update:semver-major
-      - dependency-name: AutoFixture
-        update-types:
-          - version-update:semver-major
-      - dependency-name: AutoFixture.AutoMoq
-        update-types:
-          - version-update:semver-major
-      - dependency-name: AutoFixture.Idioms
-        update-types:
-          - version-update:semver-major
-      - dependency-name: AutoFixture.NUnit3
+      - dependency-name: "AutoFixture*"
         update-types:
           - version-update:semver-major
       - dependency-name: Moq
