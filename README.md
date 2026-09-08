@@ -1,6 +1,10 @@
-[![Stable](https://img.shields.io/nuget/v/Kralizek.Extensions.Configuration.Objects.svg?label=stable)](https://www.nuget.org/packages/Kralizek.Extensions.Configuration.Objects) [![Latest](https://img.shields.io/nuget/vpre/Kralizek.Extensions.Configuration.Objects.svg?label=latest)](https://www.nuget.org/packages/Kralizek.Extensions.Configuration.Objects) [![NuGet downloads](https://img.shields.io/nuget/dt/Kralizek.Extensions.Configuration.Objects.svg)](https://www.nuget.org/packages/Kralizek.Extensions.Configuration.Objects) [![CI](https://github.com/Kralizek/ObjectConfigurationExtensions/actions/workflows/ci.yml/badge.svg)](https://github.com/Kralizek/ObjectConfigurationExtensions/actions/workflows/ci.yml) [![GitHub Release](https://img.shields.io/github/v/release/Kralizek/ObjectConfigurationExtensions)](https://github.com/Kralizek/ObjectConfigurationExtensions/releases/latest)
-
 # ObjectConfigurationExtensions
+
+[![CI](https://github.com/Kralizek/ObjectConfigurationExtensions/actions/workflows/ci.yml/badge.svg)](https://github.com/Kralizek/ObjectConfigurationExtensions/actions/workflows/ci.yml)
+[![GitHub Release](https://img.shields.io/github/v/release/Kralizek/ObjectConfigurationExtensions)](https://github.com/Kralizek/ObjectConfigurationExtensions/releases/latest)
+[![Stable](https://img.shields.io/nuget/v/Kralizek.Extensions.Configuration.Objects?label=stable)](https://www.nuget.org/packages/Kralizek.Extensions.Configuration.Objects)
+[![Latest](https://img.shields.io/nuget/vpre/Kralizek.Extensions.Configuration.Objects?label=latest)](https://www.nuget.org/packages/Kralizek.Extensions.Configuration.Objects)
+[![Downloads](https://img.shields.io/nuget/dt/Kralizek.Extensions.Configuration.Objects?label=downloads)](https://www.nuget.org/packages/Kralizek.Extensions.Configuration.Objects)
 
 ObjectConfigurationExtensions lets you add a concrete object directly to `Microsoft.Extensions.Configuration`.
 
