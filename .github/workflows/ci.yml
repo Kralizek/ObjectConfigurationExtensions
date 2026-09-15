@@ -23,32 +23,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v7
+      - name: Build and test
+        uses: Kralizek/github-actions/actions/dotnet-build@v0.1
         with:
-          fetch-depth: 0
-
-      - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v6
-        with:
-          global-json-file: global.json
-          cache: true
-          cache-dependency-path: |
-            **/*.csproj
-            **/*.props
-            **/*.targets
-
-      - name: Restore
-        run: dotnet restore
-
-      - name: Verify formatting
-        run: dotnet format --verify-no-changes --no-restore
-
-      - name: Build
-        run: dotnet build --configuration $CONFIGURATION --no-restore --warnaserror
-
-      - name: Test
-        run: dotnet test --configuration $CONFIGURATION --no-build --logger GitHubActions
+          global_json_file: global.json
 
       - name: Pack
         run: dotnet pack --configuration $CONFIGURATION --no-build --output ./artifacts/packages
