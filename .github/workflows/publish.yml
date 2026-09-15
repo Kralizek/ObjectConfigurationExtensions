@@ -52,46 +52,30 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Determine prerelease version
+      - name: Determine minimum version
         if: github.event_name == 'workflow_dispatch' && inputs.release_channel != 'none'
-        id: prerelease-version
-        env:
-          RELEASE_CHANNEL: ${{ inputs.release_channel }}
+        id: minimum-version
         shell: bash
         run: |
           set -euo pipefail
 
           minimum_major_minor=$(sed -n 's:.*<MinVerMinimumMajorMinor>\([^<]*\)</MinVerMinimumMajorMinor>.*:\1:p' eng/Package.props | head -n 1)
-          minimum_version="${minimum_major_minor}.0"
-          latest_stable_tag=$(git tag -l 'v[0-9]*.[0-9]*.[0-9]*' --sort=-version:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1 || true)
 
-          if [ -z "$latest_stable_tag" ]; then
-            release_base="$minimum_version"
-          else
-            latest_stable_version="${latest_stable_tag#v}"
-            IFS=. read -r stable_major stable_minor _ <<< "$latest_stable_version"
-            auto_incremented_version="${stable_major}.$((stable_minor + 1)).0"
-            release_base=$(printf '%s\n%s\n' "$minimum_version" "$auto_incremented_version" | sort -V | tail -n 1)
+          if [[ ! "$minimum_major_minor" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
+            echo "Could not determine a valid MinVerMinimumMajorMinor from eng/Package.props."
+            exit 1
           fi
 
-          existing_tag=$(git tag --points-at HEAD -l "v${release_base}-${RELEASE_CHANNEL}.*" --sort=-version:refname | head -n 1 || true)
-          if [ -n "$existing_tag" ]; then
-            version="${existing_tag#v}"
-            echo "Reusing prerelease version for this commit: $version"
-          else
-            latest_channel_tag=$(git tag -l "v${release_base}-${RELEASE_CHANNEL}.*" --sort=-version:refname | head -n 1 || true)
-            if [ -z "$latest_channel_tag" ]; then
-              channel_number=1
-            else
-              channel_number="${latest_channel_tag##*.}"
-              channel_number=$((channel_number + 1))
-            fi
+          echo "version=${minimum_major_minor}.0" >> "$GITHUB_OUTPUT"
 
-            version="${release_base}-${RELEASE_CHANNEL}.${channel_number}"
-            echo "Selected prerelease version: $version"
-          fi
-
-          echo "version=$version" >> "$GITHUB_OUTPUT"
+      - name: Determine prerelease version
+        if: github.event_name == 'workflow_dispatch' && inputs.release_channel != 'none'
+        id: prerelease-version
+        uses: Kralizek/github-actions/actions/calculate-next-release@v0.2
+        with:
+          bump: minor
+          channel: ${{ inputs.release_channel }}
+          minimum-version: ${{ steps.minimum-version.outputs.version }}
 
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v6
@@ -146,36 +130,22 @@ jobs:
 
       - name: Validate GitHub release metadata
         if: github.event_name == 'release'
+        id: validate-release
+        uses: Kralizek/github-actions/actions/validate-release@v0.2
+        with:
+          tag: ${{ github.event.release.tag_name }}
+          prerelease: ${{ github.event.release.prerelease }}
+
+      - name: Validate release package version
+        if: github.event_name == 'release'
         env:
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
-          RELEASE_IS_PRERELEASE: ${{ github.event.release.prerelease }}
+          RELEASE_VERSION: ${{ steps.validate-release.outputs.version }}
         shell: bash
         run: |
           set -euo pipefail
 
-          if [[ ! "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
-            echo "Release tag is not a supported Semantic Versioning tag: $RELEASE_TAG"
-            exit 1
-          fi
-
-          if [ "$(git rev-parse "$RELEASE_TAG^{commit}")" != "$(git rev-parse HEAD)" ]; then
-            echo "Release tag $RELEASE_TAG does not point to the checked-out commit."
-            exit 1
-          fi
-
-          tag_version="${RELEASE_TAG#v}"
-          if [ "$tag_version" != "$PACKAGE_VERSION" ]; then
-            echo "Release tag version $tag_version does not match packed version $PACKAGE_VERSION."
-            exit 1
-          fi
-
-          if [[ "$RELEASE_TAG" == *-* ]] && [ "$RELEASE_IS_PRERELEASE" != "true" ]; then
-            echo "Prerelease tag $RELEASE_TAG must be published as a GitHub prerelease."
-            exit 1
-          fi
-
-          if [[ "$RELEASE_TAG" != *-* ]] && [ "$RELEASE_IS_PRERELEASE" != "false" ]; then
-            echo "Stable tag $RELEASE_TAG must not be published as a GitHub prerelease."
+          if [ "$RELEASE_VERSION" != "$PACKAGE_VERSION" ]; then
+            echo "Release tag version $RELEASE_VERSION does not match packed version $PACKAGE_VERSION."
             exit 1
           fi
 
