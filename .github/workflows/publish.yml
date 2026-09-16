@@ -71,7 +71,7 @@ jobs:
       - name: Determine prerelease version
         if: github.event_name == 'workflow_dispatch' && inputs.release_channel != 'none'
         id: prerelease-version
-        uses: Kralizek/github-actions/actions/calculate-next-release@v0.2
+        uses: Kralizek/github-actions/actions/calculate-next-version@v0.3
         with:
           bump: minor
           channel: ${{ inputs.release_channel }}
@@ -131,7 +131,7 @@ jobs:
       - name: Validate GitHub release metadata
         if: github.event_name == 'release'
         id: validate-release
-        uses: Kralizek/github-actions/actions/validate-release@v0.2
+        uses: Kralizek/github-actions/actions/validate-release@v0.3
         with:
           tag: ${{ github.event.release.tag_name }}
           prerelease: ${{ github.event.release.prerelease }}

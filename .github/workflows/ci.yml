@@ -24,7 +24,7 @@ jobs:
 
     steps:
       - name: Build and test
-        uses: Kralizek/github-actions/actions/dotnet-build@v0.2
+        uses: Kralizek/github-actions/actions/dotnet-build@v0.3
         with:
           global_json_file: global.json
 
