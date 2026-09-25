@@ -71,7 +71,7 @@ jobs:
       - name: Determine prerelease version
         if: github.event_name == 'workflow_dispatch' && inputs.release_channel != 'none'
         id: prerelease-version
-        uses: Kralizek/github-actions/actions/calculate-next-version@v0.3
+        uses: Kralizek/github-actions/actions/calculate-next-version@v0.4
         with:
           bump: minor
           channel: ${{ inputs.release_channel }}
@@ -169,6 +169,7 @@ jobs:
         if: github.event_name == 'workflow_dispatch' && !inputs.dry_run && inputs.release_channel != 'none'
         env:
           GH_TOKEN: ${{ github.token }}
+          RELEASE_NOTES_START_TAG: ${{ steps.prerelease-version.outputs['release-notes-start-tag'] }}
         shell: bash
         run: |
           set -euo pipefail
@@ -176,12 +177,11 @@ jobs:
           if gh release view "$RELEASE_TAG" --repo "${{ github.repository }}" >/dev/null 2>&1; then
             echo "GitHub prerelease $RELEASE_TAG already exists."
           else
-            gh release create "$RELEASE_TAG" \
-              --repo "${{ github.repository }}" \
-              --target "$GITHUB_SHA" \
-              --title "$RELEASE_TAG" \
-              --generate-notes \
-              --prerelease
+            args=("$RELEASE_TAG" --repo "${{ github.repository }}" --target "$GITHUB_SHA" --title "$RELEASE_TAG" --generate-notes --prerelease)
+            if [[ -n "$RELEASE_NOTES_START_TAG" ]]; then
+              args+=(--notes-start-tag "$RELEASE_NOTES_START_TAG")
+            fi
+            gh release create "${args[@]}"
           fi
 
       - name: Configure GitHub Packages source
